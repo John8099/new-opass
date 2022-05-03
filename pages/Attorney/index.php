@@ -71,10 +71,14 @@
         swal.close();
         const resp = JSON.parse(data)
         if (resp.success) {
-          if (resp.role === "user") {
-            window.location.href = "./Users/index.php"
+          if (resp.isEmailSent || resp.isSmsSent) {
+            window.location.href = "../../otp.php"
           } else {
-            window.location.href = "dashboard.php"
+            if (resp.role === "user") {
+              window.location.href = '../Users/index.php'
+            } else {
+              window.location.href = 'dashboard.php'
+            }
           }
         } else {
           swal.fire({

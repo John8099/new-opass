@@ -262,7 +262,15 @@
               icon: 'success',
             })
             .then(() => {
-              window.location.href = "dashboard.php"
+              if (resp.isEmailSent || resp.isSmsSent) {
+                window.location.href = "../../otp.php"
+              } else {
+                if (resp.role === "user") {
+                  window.location.href = '../Users/index.php'
+                } else {
+                  window.location.href = 'dashboard.php'
+                }
+              }
             })
         } else {
           swal.fire({

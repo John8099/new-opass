@@ -6,7 +6,10 @@ include("functionSmsEmail.php");
 
 $resp = array(
   "success" => false,
-  "message" => ""
+  "message" => "",
+  "isEmailSent" => false,
+  "isSmsSent" => false,
+  "role" => ""
 );
 
 try {
@@ -28,6 +31,7 @@ try {
       users (fname, mname, lname, email, contact, `address`, `role`, uname, `password`) 
       VALUES('$fname','$mname','$lname','$email','$contactNum','$address','user','$uname', '$password')"
     );
+    $resp["role"] = "user";
   } else {
     //Attorney
     $sched = $_POST["sched"];
@@ -39,6 +43,7 @@ try {
       users (fname, mname, lname, email, contact, `address`, schedule, year_exp, specialization_id, `role`, uname, `password`) 
       VALUES('$fname', '$mname', '$lname', '$email', '$contactNum', '$address', '$sched', '$exp', '$spec_id', 'atty', '$uname', '$password')"
     );
+    $resp["role"] = "atty";
   }
 
   if ($q) {
@@ -48,8 +53,11 @@ try {
     $otpCode = generateOTP();
 
     $message = "Your OTP code is: $otpCode";
-    $emailSent = sendEmail($email, $message);
-    $smsSent = sendSms($contactNum, $message);
+    $emailSent = sendEmail($email, $message) == 1 ? true : false;
+    $smsSent = sendSms($contactNum, $message) == 0 ? true : false;
+
+    $resp["isEmailSent"] = $emailSent;
+    $resp["isSmsSent"] = $smsSent;
 
     $otpQuery = mysqli_query(
       $con,

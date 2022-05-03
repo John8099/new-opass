@@ -71,7 +71,15 @@
         swal.close();
         const resp = JSON.parse(data)
         if (resp.success) {
-          window.location.href = "otp.php"
+          if (resp.isEmailSent || resp.isSmsSent) {
+            window.location.href = "otp.php"
+          } else {
+            if (resp.role === "user") {
+              window.location.href = 'pages/Users/index.php'
+            } else {
+              window.location.href = 'pages/Attorney/dashboard.php'
+            }
+          }
         } else {
           swal.fire({
             title: 'Error!',

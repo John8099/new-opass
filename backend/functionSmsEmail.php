@@ -4,10 +4,11 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\SMTP;
 
+require_once '../assets/vendor/autoload.php';
+
 // Send Email notif
 function sendEmail($sendTo, $content)
 {
-  require "vendor/PHPMailer/vendor/autoload.php";
   $mail = new PHPMailer(true);
 
   try {
@@ -15,23 +16,25 @@ function sendEmail($sendTo, $content)
     $mail->SMTPDebug = 0;
     $mail->Host = "smtp.gmail.com";
     $mail->SMTPAuth = 1;
-    $mail->Username = "drellbatarian@gmail.com";
-    $mail->Password = 'drellbatariancomplex';
+    $mail->Username = "opass6460@gmail.com";
+    $mail->Password = 'opass12345';
+    // $mail->Username = "drellbatarian@gmail.com";
+    // $mail->Password = 'drellbatariancomplex';
     // $mail->Username = "pedro.juan42069@gmail.com";
     // $mail->Password = 'juanpedro42069';
     $mail->Port = 587;
     $mail->SMTPSecure = 'tls';
 
-    $mail->setFrom("drellbatarian@gmail.com");
+    $mail->setFrom("opass6460@gmail.com", "Online Public Attorney Scheduling System");
     // $mail->setFrom("pedro.juan42069@gmail.com");
     $mail->addAddress($sendTo);
     $mail->addReplyTo("noreply@google.com");
 
     $html_body = file_get_contents('email-template.php');
     $html_body = str_replace('%content%', $content, $html_body);
-    $mail->addEmbeddedImage("5.png", "logo");
+    $mail->addEmbeddedImage("../5.png", "logo");
     $mail->IsHTML(true);
-    $mail->Subject = "OPASS";
+    $mail->Subject = "OPASS OTP Code";
     $mail->Body    = $html_body;
     return $mail->send();
   } catch (Exception $e) {
