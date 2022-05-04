@@ -857,7 +857,7 @@ a.dt-button.active:not(.disabled) {
   width: 0;
 }
 
-.sidebar-hide .logo span {
+.sidebar-hide .logo span, .sidebar-hide .logo img {
   display: none;
 }
 

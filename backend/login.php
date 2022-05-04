@@ -22,25 +22,29 @@ try {
   if ($query) {
     if (mysqli_num_rows($query) > 0) {
       $user = mysqli_fetch_object($query);
-      if (password_verify($password, $user->password)) {
-        $_SESSION['id'] = $user->id;
-        $resp["success"] = true;
-        $resp["role"] = $user->role;
-        $otpCode = generateOTP();
-
-        $message = "Your OTP code is: $otpCode";
-        $emailSent = sendEmail($user->email, $message) == 1 ? true : false;
-        $smsSent = sendSms($user->contact, $message) == 0 ? true : false;
-
-        $resp["isEmailSent"] = $emailSent;
-        $resp["isSmsSent"] = $smsSent;
-
-        $otpQuery = mysqli_query(
-          $con,
-          "INSERT INTO otp(`user_id`, code, is_email_sent, is_sms_sent) VALUES('$user->id','$otpCode', '$emailSent', '$smsSent')"
-        );
+      if ($user->role !== $_GET["role"]) {
+        $resp["message"] = "User not found";
       } else {
-        $resp["message"] = "Error Password";
+        if (password_verify($password, $user->password)) {
+          $_SESSION['id'] = $user->id;
+          $resp["success"] = true;
+          $resp["role"] = $user->role;
+          $otpCode = generateOTP();
+
+          $message = "Your OTP code is: $otpCode";
+          $emailSent = sendEmail($user->email, $message) == 1 ? true : false;
+          $smsSent = sendSms($user->contact, $message) == 0 ? true : false;
+
+          $resp["isEmailSent"] = $emailSent;
+          $resp["isSmsSent"] = $smsSent;
+
+          $otpQuery = mysqli_query(
+            $con,
+            "INSERT INTO otp(`user_id`, code, is_email_sent, is_sms_sent) VALUES('$user->id','$otpCode', '$emailSent', '$smsSent')"
+          );
+        } else {
+          $resp["message"] = "Error Password";
+        }
       }
     } else {
       $resp["message"] = "User not found";

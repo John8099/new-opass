@@ -64,7 +64,7 @@
   $("#login-form").on("submit", function(e) {
     swal.showLoading();
     $.ajax({
-      url: 'backend/login.php',
+      url: 'backend/login.php?role=user',
       data: $(this).serialize(),
       type: 'POST',
       success: function(data) {

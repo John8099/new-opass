@@ -22,12 +22,12 @@ switch ($_GET["action"]) {
 function confirmOtp($user_id, $code)
 {
   global $con;
-  $confirmOtpQuery = mysqli_query($con, "SELECT * FROM otp WHERE `user_id`='$user_id' and code = '$code'");
   $resp = array(
-    "isCorrect" => "false",
+    "isCorrect" => false,
     "userRole" => "",
     "message" => "",
   );
+  $confirmOtpQuery = mysqli_query($con, "SELECT * FROM otp WHERE `user_id`='$user_id' and code = '$code' ORDER BY id ASC LIMIT 1");
   if (mysqli_num_rows($confirmOtpQuery) > 0) {
     $user = mysqli_fetch_object(
       mysqli_query(
@@ -39,7 +39,7 @@ function confirmOtp($user_id, $code)
       $resp["userRole"] = $user->role;
       $removeOTP = mysqli_query($con, "DELETE FROM otp WHERE `user_id`='$user_id'");
       if ($removeOTP) {
-        $resp["isCorrect"] = "true";
+        $resp["isCorrect"] = true;
       }
     }
   } else {

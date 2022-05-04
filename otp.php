@@ -90,9 +90,8 @@ $user = mysqli_fetch_object(
       success: function(data) {
         swal.close();
         const resp = JSON.parse(data)
-        console.log(resp)
         if (resp.isCorrect) {
-          if (resp.userRole === "user") {
+          if (resp.userRole == "user") {
             window.location.href = 'pages/Users/index.php'
           } else {
             window.location.href = 'pages/Attorney/dashboard.php'

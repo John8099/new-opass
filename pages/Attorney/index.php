@@ -43,7 +43,7 @@
                 </div>
                 <button type="submit" class="btn btn-primary m-b-30 m-t-30">Sign in</button>
                 <div class="register-link m-t-15 text-center">
-                  <p>Don't have account ? <a href="pages/sign-up.php"> Sign Up Here</a></p>
+                  <p>Don't have account ? <a href="sign-up.php"> Sign Up Here</a></p>
                 </div>
               </form>
             </div>
@@ -64,7 +64,7 @@
   $("#login-form").on("submit", function(e) {
     swal.showLoading();
     $.ajax({
-      url: '../../backend/login.php',
+      url: '../../backend/login.php?role=atty',
       data: $(this).serialize(),
       type: 'POST',
       success: function(data) {
