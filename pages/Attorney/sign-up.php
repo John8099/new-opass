@@ -29,7 +29,7 @@
           <div class="login-content" style="margin:0;">
             <div class="login-logo">
               <a href="./">
-                <img src="../../5.png" style="height: 150px;width: 280px;">
+                <img src="../../5.png" style="height: 120px;width: 280px;">
               </a>
             </div>
             <div class="login-form">
@@ -54,6 +54,10 @@
                 <div class="form-group">
                   <label class="control-label">Address</label>
                   <input type="text" class="form-control" placeholder="Address" name="address" required>
+                </div>
+                <div class="form-group">
+                  <label class="control-label">Birthday</label>
+                  <input type="date" class="form-control" placeholder="Birthday" name="bday" required>
                 </div>
                 <div class="form-group">
                   <label class="control-label">Schedule</label>

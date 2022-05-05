@@ -15,10 +15,59 @@ switch ($_GET["action"]) {
   case "validateOtp";
     print_r(confirmOtp($_POST["user_id"], $_POST["otp_code"]));
     break;
+  case "checkPassword";
+    print_r(checkPassword($_POST["user_id"], $_POST["password"]));
+    break;
+  case "updatePassword";
+    print_r(updatePassword($_POST["user_id"], $_POST["password"]));
+    break;
   default:
     null;
     break;
 }
+
+function updatePassword($user_id, $password)
+{
+  global $con;
+  $resp = array(
+    "success" => false,
+    "message" => "",
+  );
+  $hashPass = password_hash($password, PASSWORD_ARGON2I);
+  $updatePasswordQuery = mysqli_query(
+    $con,
+    "UPDATE users SET `password`='$hashPass' WHERE id = '$user_id'"
+  );
+  if ($updatePasswordQuery) {
+    $resp["success"] = true;
+  }
+  return json_encode($resp);
+}
+
+function checkPassword($user_id, $password)
+{
+  global $con;
+  $resp = array(
+    "success" => false,
+    "message" => "",
+  );
+  $userQuery = mysqli_query(
+    $con,
+    "SELECT * FROM users WHERE id=$user_id"
+  );
+  if (mysqli_num_rows($userQuery) > 0) {
+    $user = mysqli_fetch_object($userQuery);
+    if (password_verify($password, $user->password)) {
+      $resp["success"] = true;
+    } else {
+      $resp["message"] = "Old Password not match";
+    }
+  } else {
+    $resp["message"] = "Old Password not match";
+  }
+  return json_encode($resp);
+}
+
 function confirmOtp($user_id, $code)
 {
   global $con;

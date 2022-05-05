@@ -79,7 +79,7 @@
           <div class="dropdown dib">
             <div class="header-icon" data-toggle="dropdown">
               <span class="user-avatar">
-                <img src="../../profile-photo/<?= $user->profile == null ? 'default.png' : $user->profile ?>" style="width: 40px; height: 40px; border-radius: 50px;">
+                <img class="rounded-circle border " src="../../profile-photo/<?= $user->profile == null ? 'default.png' : $user->profile ?>" style="width: 40px; height: 40px;">
                 <i class="ti-angle-down f-s-10"></i>
               </span>
               <div class="drop-down dropdown-profile dropdown-menu dropdown-menu-right" style="margin: 0; padding: 0;border-radius: 10px;">
@@ -93,7 +93,7 @@
                 </div>
                 <div class="dropdown-content-body">
                   <ul>
-                    <li onclick="return window.location.href = '../../components/profile.php?id=<?= $user->id ?>'">
+                    <li onclick="return window.location.href = 'profile.php?id=<?= $user->id ?>'">
                       <a>
                         <i class="ti-user"></i>
                         <span>Profile</span>

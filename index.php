@@ -27,7 +27,7 @@
           <div class="login-content" style="margin:0;">
             <div class="login-logo">
               <a href="index.php">
-                <img src="5.png" style="height: 150px;width: 280px;">
+                <img src="5.png" style="height: 120px;width: 280px;">
               </a>
             </div>
             <div class="login-form">

@@ -18,6 +18,7 @@ try {
   $lname = $_POST["lname"];
   $contactNum = $_POST["contactNum"];
   $address = $_POST["address"];
+  $bday = $_POST["bday"];
   $uname = $_POST["uname"];
   $email = $_POST["email"];
   $password = password_hash($_POST["password"], PASSWORD_ARGON2I);
@@ -28,8 +29,8 @@ try {
     $q = mysqli_query(
       $con,
       "INSERT INTO 
-      users (fname, mname, lname, email, contact, `address`, `role`, uname, `password`) 
-      VALUES('$fname','$mname','$lname','$email','$contactNum','$address','user','$uname', '$password')"
+      users (fname, mname, lname, email, contact, `address`, birthday, `role`, uname, `password`) 
+      VALUES('$fname', '$mname', '$lname', '$email', '$contactNum', '$address', '$bday', 'user', '$uname', '$password')"
     );
     $resp["role"] = "user";
   } else {
@@ -40,8 +41,8 @@ try {
     $q = mysqli_query(
       $con,
       "INSERT INTO 
-      users (fname, mname, lname, email, contact, `address`, schedule, year_exp, specialization_id, `role`, uname, `password`) 
-      VALUES('$fname', '$mname', '$lname', '$email', '$contactNum', '$address', '$sched', '$exp', '$spec_id', 'atty', '$uname', '$password')"
+      users (fname, mname, lname, email, contact, `address`,birthday, schedule, year_exp, specialization_id, `role`, uname, `password`) 
+      VALUES('$fname', '$mname', '$lname', '$email', '$contactNum', '$address', '$bday', '$sched', '$exp', '$spec_id', 'atty', '$uname', '$password')"
     );
     $resp["role"] = "atty";
   }
