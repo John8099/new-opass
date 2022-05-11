@@ -21,9 +21,68 @@ switch ($_GET["action"]) {
   case "updatePassword";
     print_r(updatePassword($_POST["user_id"], $_POST["password"]));
     break;
+  case "updateUserProfile":
+    print_r(updateUserProfile());
+    break;
   default:
     null;
     break;
+}
+
+function updateUserProfile()
+{
+  global $con;
+  global $_POST;
+  global $_FILES;
+
+  $resp = array(
+    "success" => false,
+    "message" => "",
+  );
+
+  date_default_timezone_set("Asia/Manila");
+
+  $id = $_POST["id"];
+  $fname = $_POST["fname"];
+  $mname = $_POST["mname"];
+  $lname = $_POST["lname"];
+  $email = $_POST["email"];
+  $contactNumber = $_POST["contactNumber"];
+  $address = $_POST["address"];
+  $bday = $_POST["bday"];
+  $uname = $_POST["uname"];
+
+  $query = "";
+
+  if (intval($_FILES["profile"]["error"]) == 0) {
+    $uploadFile = date("mdY-his") . "_" . basename($_FILES['profile']['name']);
+    $dir = "../profile-photo";
+
+    if (!is_dir($dir)) {
+      mkdir($dir, 0777, true);
+    }
+    if (move_uploaded_file($_FILES['profile']['tmp_name'], "$dir/$uploadFile")) {
+      $query = "UPDATE users SET `profile`='$uploadFile', fname='$fname', mname='$mname', lname='$lname', email='$email', contact='$contactNumber', `address`='$address', birthday='$bday', uname='$uname' WHERE id='$id'";
+    } else {
+      $resp["message"] = "Error Uploading file.";
+    }
+  } else {
+    $query = "UPDATE users SET fname='$fname', mname='$mname', lname='$lname', email='$email', contact='$contactNumber', `address`='$address', birthday='$bday', uname='$uname' WHERE id='$id'";
+  }
+
+  if ($resp["message"] == "") {
+    $comm = mysqli_query(
+      $con,
+      $query
+    );
+
+    if ($comm) {
+      $resp["success"] = true;
+    } else {
+      $resp["message"] = mysqli_error($con);
+    }
+  }
+  return json_encode($resp);
 }
 
 function updatePassword($user_id, $password)
@@ -100,17 +159,38 @@ function confirmOtp($user_id, $code)
 function checkEmailExist($email)
 {
   global $con;
-  return mysqli_num_rows(mysqli_query($con, "SELECT email FROM users WHERE email='$email'")) > 0 ? "true" : "false";
+  global $_POST;
+  global $_SESSION;
+
+  if (isset($_POST["isMyInfo"]) && isset($_SESSION['id'])) {
+    return mysqli_num_rows(mysqli_query($con, "SELECT email FROM users WHERE email='$email' and id != $_SESSION[id]")) > 0 ? "true" : "false";
+  } else {
+    return mysqli_num_rows(mysqli_query($con, "SELECT email FROM users WHERE email='$email'")) > 0 ? "true" : "false";
+  }
 }
 
 function contactNumberExist($contact)
 {
   global $con;
-  return mysqli_num_rows(mysqli_query($con, "SELECT contact FROM users WHERE contact='$contact'")) > 0 ? "true" : "false";
+  global $_POST;
+  global $_SESSION;
+
+  if (isset($_POST["isMyInfo"]) && isset($_SESSION['id'])) {
+    return mysqli_num_rows(mysqli_query($con, "SELECT contact FROM users WHERE contact='$contact' and id != $_SESSION[id]")) > 0 ? "true" : "false";
+  } else {
+    return mysqli_num_rows(mysqli_query($con, "SELECT contact FROM users WHERE contact='$contact'")) > 0 ? "true" : "false";
+  }
 }
 
 function userNameExist($userName)
 {
   global $con;
-  return mysqli_num_rows(mysqli_query($con, "SELECT uname FROM users WHERE uname='$userName'")) > 0 ? "true" : "false";
+  global $_POST;
+  global $_SESSION;
+
+  if (isset($_POST["isMyInfo"]) && isset($_SESSION['id'])) {
+    return mysqli_num_rows(mysqli_query($con, "SELECT uname FROM users WHERE uname='$userName' and id != $_SESSION[id]")) > 0 ? "true" : "false";
+  } else {
+    return mysqli_num_rows(mysqli_query($con, "SELECT uname FROM users WHERE uname='$userName'")) > 0 ? "true" : "false";
+  }
 }

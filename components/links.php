@@ -34,6 +34,11 @@ $userLinks = array(
     "icon" => "ti-email",
     "link" => "inbox.php"
   ),
+  "attorney" => array(
+    "title" => "Attorney",
+    "icon" => "fa fa-black-tie",
+    "link" => "attorneys.php"
+  ),
   "bookAppoint" => array(
     "title" => "Book Appointment",
     "icon" => "ti-calendar",

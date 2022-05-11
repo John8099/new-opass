@@ -10,7 +10,7 @@ $user = mysqli_fetch_object(
     "SELECT * FROM users WHERE id = $_SESSION[id]"
   )
 );
-if ($user->role != "user") {
+if ($user->role != "atty") {
   header("location: ../404.php");
 } ?>
 <!DOCTYPE html>
