@@ -24,9 +24,69 @@ switch ($_GET["action"]) {
   case "updateUserProfile":
     print_r(updateUserProfile());
     break;
+  case "bookAppointment":
+    print_r(bookAppointment());
+    break;
   default:
     null;
     break;
+}
+
+function bookAppointment()
+{
+  global $con, $_POST, $_SESSION;
+
+  $resp = array(
+    "success" => false,
+    "message" => ""
+  );
+
+  $creator = getNotificationCreator($_SESSION['id']);
+
+  $attyId = $_POST["attyId"];
+  $request = $_POST["request"];
+  $requestDate = $_POST["requestDate"];
+  $requestTime = $_POST["requestTime"];
+
+  $bookAppointmentQuery = mysqli_query(
+    $con,
+    "INSERT INTO appointments(attorney_id, `user_id`, request, appointment_date, appointment_time, `status`) VALUES('$attyId', '$_SESSION[id]', '$request', '$requestDate', '$requestTime', 'pending')"
+  );
+
+  if ($bookAppointmentQuery) {
+    $text = ucwords("$creator->fname " . $creator->mname[0] . ". $creator->lname") . " book an Appointment";
+    insertNotification($attyId, $creator->id, $text);
+    $resp["success"] = true;
+  } else {
+    $resp["message"] = mysqli_error($con);
+  }
+
+  return json_encode($resp);
+}
+
+function getNotificationCreator($id)
+{
+
+  global $con;
+
+  $creatorQuery = mysqli_query(
+    $con,
+    "SELECT * FROM users WHERE id=$id"
+  );
+
+  return mysqli_fetch_object($creatorQuery);
+}
+
+function insertNotification($notify_to, $creator_id, $text)
+{
+  global $con;
+
+  $query = mysqli_query(
+    $con,
+    "INSERT INTO notifications(notify_to, creator_id, `text`) VALUES('$notify_to', '$creator_id', '$text')"
+  );
+
+  return $query ? true : false;
 }
 
 function updateUserProfile()

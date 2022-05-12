@@ -21,11 +21,9 @@ if ($user->role != "user") {
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>User Dashboard</title>
+  <title>Attorneys</title>
 
   <!-- Styles -->
-  <link href="../../assets/css/lib/calendar2/pignose.calendar.min.css" rel="stylesheet">
-  <link href="../../assets/css/lib/chartist/chartist.min.css" rel="stylesheet">
   <link href="../../assets/css/lib/font-awesome.min.css" rel="stylesheet">
   <link href="../../assets/css/lib/themify-icons.css" rel="stylesheet">
   <link href="../../assets/css/lib/owl.carousel.min.css" rel="stylesheet" />
@@ -58,7 +56,128 @@ if ($user->role != "user") {
         </div>
         <!-- /# row -->
         <section id="main-content">
-          <!-- Content here -->
+          <div class="jumbotron m-3" style="padding-top: 15px;">
+            <h3>
+              Top rated Lawyers
+            </h3>
+            <div class="row d-flex justify-content-center">
+              <?php
+              $featuredQuery = mysqli_query(
+                $con,
+                "SELECT * FROM users u INNER JOIN specialization s on u.specialization_id = s.specialization_id WHERE `role`='atty' and year_exp > 9"
+              );
+              if (mysqli_num_rows($featuredQuery) > 0) :
+                while ($featuredAtty = mysqli_fetch_object($featuredQuery)) :
+              ?>
+                  <div class="col-lg-5">
+                    <div class="card">
+                      <div class="card-body">
+                        <div class="user-profile">
+                          <div class="d-flex flex-column">
+                            <center>
+                              <div class="user-profile-name">
+                                <?= ucwords("Atty. " . "$featuredAtty->fname " . $featuredAtty->mname[0] . ".
+                                $featuredAtty->lname") ?>
+                              </div>
+                            </center>
+                          </div>
+                          <div class="user-work mt-3">
+                            <div class="work-content">
+                              <h3>Specialized in</h3>
+                              <p><?= $featuredAtty->specialization_name ?></p>
+                            </div>
+                            <div class="work-content">
+                              <h3>Age</h3>
+                              <p>
+                                <?php
+                                date_default_timezone_set("Asia/Manila");
+                                $bday = new DateTime($featuredAtty->birthday);
+                                $today = new Datetime(date('y-m-d'));
+                                $diff = $today->diff($bday);
+                                printf(
+                                  '%d',
+                                  $diff->y
+                                ); ?>
+                              </p>
+                            </div>
+                          </div>
+                          <div class="d-flex justify-content-end">
+                            <a href="book-appointment.php?attyId=<?= $featuredAtty->id ?>" class="btn btn-success m-2">Book Appointment</a>
+                            <a href="attorney-details.php?id=<?= $featuredAtty->id ?>" class="btn btn-primary m-2">More</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <?php endwhile; ?>
+              <?php else : ?>
+                <h2 style="margin-top: 20px;">No top rated lawyers to display.</h2>
+              <?php
+              endif; ?>
+
+            </div>
+          </div>
+          <div class="jumbotron m-3" style="padding-top: 15px;">
+            <h3>
+              Our Lawyers
+            </h3>
+            <div class="row d-flex justify-content-center">
+              <?php
+              $featuredQuery = mysqli_query(
+                $con,
+                "SELECT * FROM users u INNER JOIN specialization s on u.specialization_id = s.specialization_id WHERE `role`='atty'and year_exp < 9"
+              );
+              if (mysqli_num_rows($featuredQuery) > 0) :
+                while ($featuredAtty = mysqli_fetch_object($featuredQuery)) :
+              ?>
+                  <div class="col-lg-5">
+                    <div class="card">
+                      <div class="card-body">
+                        <div class="user-profile">
+                          <div class="d-flex flex-column">
+                            <center>
+                              <div class="user-profile-name">
+                                <?= ucwords("Atty. " . "$featuredAtty->fname " . $featuredAtty->mname[0] . ".
+                                $featuredAtty->lname") ?>
+                              </div>
+                            </center>
+                          </div>
+                          <div class="user-work mt-3">
+                            <div class="work-content">
+                              <h3>Specialized in</h3>
+                              <p><?= $featuredAtty->specialization_name ?></p>
+                            </div>
+                            <div class="work-content">
+                              <h3>Age</h3>
+                              <p>
+                                <?php
+                                date_default_timezone_set("Asia/Manila");
+                                $bday = new DateTime($featuredAtty->birthday);
+                                $today = new Datetime(date('y-m-d'));
+                                $diff = $today->diff($bday);
+                                printf(
+                                  '%d',
+                                  $diff->y
+                                ); ?>
+                              </p>
+                            </div>
+                          </div>
+                          <div class="d-flex justify-content-end">
+                            <a href="#update-password" data-toggle="modal" class="btn btn-success m-2">Book Appointment</a>
+                            <a href="attorney-details.php?id=<?= $featuredAtty->id ?>" class="btn btn-primary m-2">More</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <?php endwhile; ?>
+              <?php else : ?>
+                <h2 style="margin-top: 20px;">No top rated lawyers to display.</h2>
+              <?php
+              endif; ?>
+
+            </div>
+          </div>
         </section>
       </div>
     </div>
@@ -77,21 +196,13 @@ if ($user->role != "user") {
   <!-- bootstrap -->
 
   <script src="../../assets/js/lib/calendar-2/moment.latest.min.js"></script>
-  <script src="../../assets/js/lib/calendar-2/pignose.calendar.min.js"></script>
-  <script src="../../assets/js/lib/calendar-2/pignose.init.js"></script>
 
 
-  <script src="../../assets/js/lib/weather/jquery.simpleWeather.min.js"></script>
-  <script src="../../assets/js/lib/weather/weather-init.js"></script>
   <script src="../../assets/js/lib/circle-progress/circle-progress.min.js"></script>
   <script src="../../assets/js/lib/circle-progress/circle-progress-init.js"></script>
-  <script src="../../assets/js/lib/chartist/chartist.min.js"></script>
-  <script src="../../assets/js/lib/sparklinechart/jquery.sparkline.min.js"></script>
-  <script src="../../assets/js/lib/sparklinechart/sparkline.init.js"></script>
   <script src="../../assets/js/lib/owl-carousel/owl.carousel.min.js"></script>
   <script src="../../assets/js/lib/owl-carousel/owl.carousel-init.js"></script>
   <!-- scripit init-->
-  <script src="../../assets/js/dashboard2.js"></script>
 </body>
 
 </html>
