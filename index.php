@@ -72,6 +72,7 @@
         const resp = JSON.parse(data)
         if (resp.success) {
           if (resp.isEmailSent || resp.isSmsSent) {
+            sessionStorage.setItem("response", JSON.stringify(resp))
             window.location.href = "otp.php"
           } else {
             if (resp.role === "user") {

@@ -39,14 +39,14 @@ $userLinks = array(
     "icon" => "fa fa-black-tie",
     "link" => "attorneys.php"
   ),
+  "searchAttorney" => array(
+    "title" => "Search Attorney",
+    "icon" => "fa fa-search",
+    "link" => "search-attorney.php"
+  ),
   "bookAppoint" => array(
     "title" => "Book Appointment",
     "icon" => "ti-calendar",
     "link" => "book-appointment.php"
-  ),
-  "doneAppoint" => array(
-    "title" => "Done Appointments",
-    "icon" => "ti-check-box",
-    "link" => "done-appointments.php"
   ),
 );

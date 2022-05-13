@@ -163,7 +163,7 @@ if ($user->role != "user") {
                             </div>
                           </div>
                           <div class="d-flex justify-content-end">
-                            <a href="#update-password" data-toggle="modal" class="btn btn-success m-2">Book Appointment</a>
+                            <a href="book-appointment.php?attyId=<?= $featuredAtty->id ?>" class="btn btn-success m-2">Book Appointment</a>
                             <a href="attorney-details.php?id=<?= $featuredAtty->id ?>" class="btn btn-primary m-2">More</a>
                           </div>
                         </div>

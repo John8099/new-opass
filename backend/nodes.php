@@ -1,6 +1,7 @@
 <?php
 session_start();
 include_once("conn.php");
+include_once("functionSmsEmail.php");
 
 switch ($_GET["action"]) {
   case "emailExist":
@@ -27,9 +28,221 @@ switch ($_GET["action"]) {
   case "bookAppointment":
     print_r(bookAppointment());
     break;
+  case "doneAppointment":
+    print_r(doneAppointment());
+    break;
+  case "cancelAppointment":
+    print_r(cancelAppointment());
+    break;
+  case "acceptAppointment":
+    print_r(acceptAppointment());
+    break;
+  case "deleteAppointment":
+    print_r(deleteAppointment());
+    break;
   default:
     null;
     break;
+}
+
+function deleteAppointment()
+{
+  global $con, $_POST;
+
+  if (count($_POST) == 0) convertUrlDataToPost();
+
+  $resp = array(
+    "success" => false,
+    "message" => ""
+  );
+  $deleteAppointmentQuery = mysqli_query(
+    $con,
+    "DELETE FROM appointments WHERE appointment_id='$_POST[appointment_id]'"
+  );
+
+  if ($deleteAppointmentQuery) {
+    $resp["success"] = true;
+    $resp["message"] = "Successfully deleted the appointment.";
+  } else {
+    $resp["message"] = mysqli_error($con);
+  }
+
+  return json_encode($resp);
+}
+
+function acceptAppointment()
+{
+  date_default_timezone_set("Asia/Manila");
+  global $con, $_POST;
+
+  if (count($_POST) == 0) convertUrlDataToPost();
+
+  $resp = array(
+    "success" => false,
+    "message" => ""
+  );
+  $date = date("Y-m-d");
+  $acceptAppointmentQuery = mysqli_query(
+    $con,
+    "UPDATE appointments SET `status`='accepted', date_accepted='$date' WHERE appointment_id='$_POST[appointment_id]'"
+  );
+
+  if ($acceptAppointmentQuery) {
+    // Notification
+    $creator = getNotificationCreator($_SESSION['id']);
+    $text = ucwords("$creator->fname " . $creator->mname[0] . ". $creator->lname") . " accepted the Appointment";
+    insertNotification($_POST['notifyTo'], $creator->id, $text);
+
+    // Send sms and email
+    $appointment = getAppointmentData($_POST["appointment_id"]);
+    $appointmentDate = date_format(
+      date_create("$appointment->appointment_date $appointment->appointment_time"),
+      "M d, Y h:i A"
+    );
+    $message = "Your Appointment on $appointmentDate was accepted";
+
+    $userId = $creator->id === $appointment->attorney_id ? $appointment->user_id : $appointment->attorney_id;
+    $user = getUserData($userId);
+
+    sendEmail($user->email, $message);
+    sendSms($user->contact, $message);
+
+    $resp["success"] = true;
+    $resp["message"] = "Successfully accepted the appointment.";
+  } else {
+    $resp["message"] = mysqli_error($con);
+  }
+
+  return json_encode($resp);
+}
+
+function cancelAppointment()
+{
+  date_default_timezone_set("Asia/Manila");
+  global $con, $_POST;
+
+  if (count($_POST) == 0) convertUrlDataToPost();
+
+  $resp = array(
+    "success" => false,
+    "message" => ""
+  );
+
+  $date = date("Y-m-d");
+  $cancelAppointmentQuery = mysqli_query(
+    $con,
+    "UPDATE appointments SET cancelation_reason='$_POST[inputRemark]', `status`='canceled', date_ended='$date' WHERE appointment_id='$_POST[appointment_id]'"
+  );
+
+  if ($cancelAppointmentQuery) {
+    // Notification
+    $creator = getNotificationCreator($_SESSION['id']);
+    $text = ucwords("$creator->fname " . $creator->mname[0] . ". $creator->lname") . " canceled the Appointment";
+    insertNotification($_POST['notifyTo'], $creator->id, $text);
+
+    // Send sms and email
+    $appointment = getAppointmentData($_POST["appointment_id"]);
+    $appointmentDate = date_format(
+      date_create("$appointment->appointment_date $appointment->appointment_time"),
+      "M d, Y h:i A"
+    );
+    $message = "Your Appointment on $appointmentDate was canceled";
+
+    $userId = $creator->id === $appointment->attorney_id ? $appointment->user_id : $appointment->attorney_id;
+    $user = getUserData($userId);
+
+    sendEmail($user->email, $message);
+    sendSms($user->contact, $message);
+
+    $resp["success"] = true;
+    $resp["message"] = "Successfully canceled the appointment.";
+  } else {
+    $resp["message"] = mysqli_error($con);
+  }
+
+  return json_encode($resp);
+}
+
+
+
+function doneAppointment()
+{
+  date_default_timezone_set("Asia/Manila");
+  global $con, $_POST;
+
+  if (count($_POST) == 0) convertUrlDataToPost();
+
+  $resp = array(
+    "success" => false,
+    "message" => ""
+  );
+
+  $date = date("Y-m-d");
+  $doneAppointmentQuery = mysqli_query(
+    $con,
+    "UPDATE appointments SET ended_remark='$_POST[inputRemark]', `status`='done', date_ended='$date' WHERE appointment_id='$_POST[appointment_id]'"
+  );
+
+  if ($doneAppointmentQuery) {
+    // Notification
+    $creator = getNotificationCreator($_SESSION['id']);
+    $text = ucwords("$creator->fname " . $creator->mname[0] . ". $creator->lname") . " ended the Appointment";
+    insertNotification($_POST['notifyTo'], $creator->id, $text);
+
+    // Send sms and email
+    $appointment = getAppointmentData($_POST["appointment_id"]);
+    $appointmentDate = date_format(
+      date_create("$appointment->appointment_date $appointment->appointment_time"),
+      "M d, Y h:i A"
+    );
+    $message = "Your Appointment on $appointmentDate was ended";
+
+    $userId = $creator->id === $appointment->attorney_id ? $appointment->user_id : $appointment->attorney_id;
+    $user = getUserData($userId);
+
+    sendEmail($user->email, $message);
+    sendSms($user->contact, $message);
+
+    $resp["success"] = true;
+    $resp["message"] = "Successfully ended the appointment.";
+  } else {
+    $resp["message"] = mysqli_error($con);
+  }
+
+  return json_encode($resp);
+}
+
+function convertUrlDataToPost()
+{
+  $entityBody = json_decode(file_get_contents('php://input'));
+
+  foreach ($entityBody as $index => $value) {
+    $_POST[$index] = $value;
+  }
+}
+
+function getUserData($user_id)
+{
+  global $con;
+
+  $query = mysqli_query(
+    $con,
+    "SELECT * FROM users WHERE id=$user_id"
+  );
+
+  return mysqli_fetch_object($query);
+}
+
+function getAppointmentData($appointmentId)
+{
+  global $con;
+
+  $query = mysqli_query(
+    $con,
+    "SELECT * FROM appointments WHERE appointment_id=$appointmentId"
+  );
+
+  return mysqli_fetch_object($query);
 }
 
 function bookAppointment()

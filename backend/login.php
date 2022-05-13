@@ -31,7 +31,7 @@ try {
           $resp["role"] = $user->role;
           $otpCode = generateOTP();
 
-          $message = "Your OTP code is: $otpCode";
+          $message = "Your OTP code is $otpCode";
           $emailSent = sendEmail($user->email, $message) == 1 ? true : false;
           $smsSent = sendSms($user->contact, $message) == 0 ? true : false;
 

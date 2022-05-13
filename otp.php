@@ -97,12 +97,11 @@ $user = mysqli_fetch_object(
         <h6>Please enter the one time password <br> to verify your account</h6>
         <div>
           <span>A code has been sent to</span>
-          <br>
-          <small>*******<?= substr($user->contact, -4); ?> </small>
-          <br>
-          or
-          <br>
-          <small><?= hideEmail(5, $user->email) ?></small>
+          <small id="number">*******<?= substr($user->contact, -4); ?> </small>
+          <span id="or">
+            OR
+          </span>
+          <small id="email"><?= hideEmail(5, $user->email) ?></small>
         </div>
         <input type="text" value="<?= $user->id ?>" readonly hidden id="userID">
         <div id="otp" class="inputs d-flex flex-row justify-content-center mt-2">
@@ -130,6 +129,32 @@ $user = mysqli_fetch_object(
 <script src="assets/js/scripts.js"></script>
 
 <script>
+  const response = JSON.parse(sessionStorage.getItem("response"));
+  if (!response) {
+    history.back();
+  } else {
+    $("#number").hide()
+    $("#or").hide()
+    $("#email").hide()
+    if (response.isEmailSent || response.isSmsSent) {
+      if (response.isEmailSent && response.isSmsSent) {
+        $("#number").show()
+        $("#or").show()
+        $("#email").show()
+      } else if (response.isEmailSent && !response.isSmsSent) {
+        $("#email").show()
+      } else {
+        $("#number").show()
+      }
+    } else {
+      if (role === "atty") {
+        window.location.href = "pages/Attorney/dashboard.php"
+      } else {
+        window.location.href = "pages/Users/index.php"
+      }
+    }
+  }
+
   $("#validate").on("click", () => {
     const code = $("#first").val() + $("#second").val() + $("#third").val() + $("#fourth").val() + $("#fifth").val() + $("#sixth").val();
     swal.showLoading();
