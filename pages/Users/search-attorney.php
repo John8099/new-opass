@@ -69,7 +69,7 @@ if ($user->role != "user") {
                       <th>Schedule</th>
                       <th>Year of Experience</th>
                       <th>Specialization</th>
-                      <th>Actions</th>
+                      <th class="text-center">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -99,7 +99,7 @@ if ($user->role != "user") {
                         <td>
                           <?= $attorney->specialization_name ?>
                         </td>
-                        <td>
+                        <td class="d-flex justify-content-center">
                           <a href="book-appointment.php?attyId=<?= $attorney->id ?>" class="btn btn-success">
                             Book Appointment
                           </a>
