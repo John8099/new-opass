@@ -1,5 +1,7 @@
 <?php
 session_start();
+date_default_timezone_set("Asia/Manila");
+
 include_once("conn.php");
 include_once("functionSmsEmail.php");
 
@@ -25,6 +27,9 @@ switch ($_GET["action"]) {
   case "updateUserProfile":
     print_r(updateUserProfile());
     break;
+  case "updateAttyProfile":
+    print_r(updateAttyProfile());
+    break;
   case "bookAppointment":
     print_r(bookAppointment());
     break;
@@ -40,9 +45,223 @@ switch ($_GET["action"]) {
   case "deleteAppointment":
     print_r(deleteAppointment());
     break;
+  case "getNotificationCount":
+    print_r(getNotificationCount());
+    break;
+  case "getNotificationData":
+    print_r(getNotificationData());
+    break;
+  case "getAllNotificationData":
+    print_r(getAllNotificationData());
+    break;
+  case "markAsSeen":
+    print_r(markAsSeen());
+    break;
+  case "getSession":
+    print_r(getSession());
+    break;
+  case "setOpenedAppointment":
+    print_r(setOpenedAppointment());
+    break;
   default:
     null;
     break;
+}
+
+function setOpenedAppointment()
+{
+  global $con, $_POST, $_SESSION;
+  $resp = array(
+    "success" => false,
+    "message" => ""
+  );
+
+  $hasAppointment = false;
+
+  if ($_POST['isChecked'] == "1") {
+    $getAppointmentQuery = mysqli_query(
+      $con,
+      "SELECT * FROM appointments WHERE attorney_id=$_SESSION[id]"
+    );
+    $dateNow = date("Y-m-d");
+
+    while ($appointment = mysqli_fetch_object($getAppointmentQuery)) {
+      if ($dateNow == $appointment->appointment_date) {
+        $hasAppointment = true;
+      }
+    }
+  }
+
+  if (!$hasAppointment) {
+    $query = mysqli_query(
+      $con,
+      "UPDATE users SET opened_appointment=$_POST[isChecked] WHERE id = $_SESSION[id]"
+    );
+    if ($query) {
+      $resp["success"] = true;
+      if ($_POST["isChecked"] == "0") {
+        $resp["message"] = "Successfully closed the opened appointment.<br>You can no longer receive chat from unrecognized or new users.";
+      } else {
+        $resp["message"] = "Successfully set to opened appointment.<br>You can now receive chat from unrecognized or new users.";
+      }
+    } else {
+      $resp["message"] = mysqli_error($con);
+    }
+  } else {
+    $resp["message"] = "Cannot set you still have an appointment today.";
+  }
+
+  return json_encode($resp);
+}
+
+function getAllNotificationData()
+{
+  global $con, $_SESSION;
+  $html = "";
+
+  $query = mysqli_query(
+    $con,
+    "SELECT * FROM notifications WHERE notify_to=$_SESSION[id] ORDER BY notification_id"
+  );
+
+  while ($data = mysqli_fetch_object($query)) {
+    $user = mysqli_fetch_object(
+      mysqli_query(
+        $con,
+        "SELECT * FROM users WHERE id = $data->creator_id"
+      )
+    );
+    $profile = $user->profile == null ? 'default.png' : $user->profile;
+    $profileDir = "../../profile-photo/$profile";
+    $time = time_elapsed_string($data->created_at);
+    $name = $user->role == "atty" ? "Atty. " . ucwords("$user->fname " . $user->mname[0] . ". $user->lname") : ucwords("$user->fname " . $user->mname[0] . ". $user->lname");
+    $isActive = $data->is_seen == 1 ? "" : "active";
+
+    $html .= "
+    <li class='$isActive m-4'>
+      <img class='pull-left mr-4 avatar-img' style='width: 40px; height: 40px;' src='$profileDir' />
+      <div class='notification-content'>
+        <small class='notification-timestamp pull-right text-primary'>
+            $time
+        </small>
+        <div class='notification-heading'>
+          $name
+        </div>
+        <div class='notification-text'>
+          $data->text
+        </div>
+      </div>
+    </li>
+  ";
+  }
+
+  return $html;
+}
+
+function getSession()
+{
+  global $_SESSION;
+
+  return json_encode(isset($_SESSION['id']));
+}
+
+function markAsSeen()
+{
+  global $con, $_SESSION;
+  $query = mysqli_query(
+    $con,
+    "UPDATE notifications SET is_seen=1 WHERE notify_to = $_SESSION[id]"
+  );
+
+  return $query ? getNotificationData() : json_encode(mysqli_error($con));
+}
+
+function getNotificationData()
+{
+  global $con, $_SESSION;
+  $html = "";
+
+  $query = mysqli_query(
+    $con,
+    "SELECT * FROM notifications WHERE notify_to=$_SESSION[id] ORDER BY notification_id DESC LIMIT 5"
+  );
+
+  while ($data = mysqli_fetch_object($query)) {
+    $user = mysqli_fetch_object(
+      mysqli_query(
+        $con,
+        "SELECT * FROM users WHERE id = $data->creator_id"
+      )
+    );
+    $profile = $user->profile == null ? 'default.png' : $user->profile;
+    $profileDir = "../../profile-photo/$profile";
+    $time = time_elapsed_string($data->created_at);
+    $name = $user->role == "atty" ? "Atty. " . ucwords("$user->fname " . $user->mname[0] . ". $user->lname") : ucwords("$user->fname " . $user->mname[0] . ". $user->lname");
+    $isActive = $data->is_seen == 1 ? "" : "active";
+
+    $html .= "
+    <li class='$isActive'>
+      <img class='pull-left m-r-10 avatar-img' src='$profileDir' />
+      <div class='notification-content'>
+        <small class='notification-timestamp pull-right text-primary'>
+            $time
+        </small>
+        <div class='notification-heading'>
+          $name
+        </div>
+        <div class='notification-text'>
+          $data->text
+        </div>
+      </div>
+    </li>
+  ";
+  }
+
+  return $html;
+}
+
+function time_elapsed_string($datetime, $full = false)
+{
+  $now = new DateTime;
+  $ago = new DateTime($datetime);
+  $diff = $now->diff($ago);
+
+  $diff->w = floor($diff->d / 7);
+  $diff->d -= $diff->w * 7;
+
+  $string = array(
+    'y' => 'year',
+    'm' => 'month',
+    'w' => 'week',
+    'd' => 'day',
+    'h' => 'hour',
+    'i' => 'minute',
+    's' => 'second',
+  );
+  foreach ($string as $k => &$v) {
+    if ($diff->$k) {
+      $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');
+    } else {
+      unset($string[$k]);
+    }
+  }
+
+  if (!$full) $string = array_slice($string, 0, 1);
+  return $string ? implode(', ', $string) . ' ago' : 'just now';
+}
+
+function getNotificationCount()
+{
+  global $con, $_SESSION;
+
+  $resp = array();
+
+  $query = mysqli_query(
+    $con,
+    "SELECT * FROM notifications WHERE notify_to=$_SESSION[id] and is_seen = 0 ORDER BY notification_id DESC"
+  );
+
+  return json_encode(mysqli_num_rows($query));
 }
 
 function deleteAppointment()
@@ -72,7 +291,7 @@ function deleteAppointment()
 
 function acceptAppointment()
 {
-  date_default_timezone_set("Asia/Manila");
+
   global $con, $_POST;
 
   if (count($_POST) == 0) convertUrlDataToPost();
@@ -118,7 +337,7 @@ function acceptAppointment()
 
 function cancelAppointment()
 {
-  date_default_timezone_set("Asia/Manila");
+
   global $con, $_POST;
 
   if (count($_POST) == 0) convertUrlDataToPost();
@@ -163,11 +382,9 @@ function cancelAppointment()
   return json_encode($resp);
 }
 
-
-
 function doneAppointment()
 {
-  date_default_timezone_set("Asia/Manila");
+
   global $con, $_POST;
 
   if (count($_POST) == 0) convertUrlDataToPost();
@@ -296,12 +513,70 @@ function insertNotification($notify_to, $creator_id, $text)
 
   $query = mysqli_query(
     $con,
-    "INSERT INTO notifications(notify_to, creator_id, `text`) VALUES('$notify_to', '$creator_id', '$text')"
+    "INSERT INTO notifications(notify_to, creator_id, `text`, is_seen) VALUES('$notify_to', '$creator_id', '$text', false)"
   );
 
   return $query ? true : false;
 }
 
+function updateAttyProfile()
+{
+  global $con;
+  global $_POST;
+  global $_FILES;
+
+  $resp = array(
+    "success" => false,
+    "message" => "",
+  );
+
+
+
+  $id = $_POST["id"];
+  $fname = $_POST["fname"];
+  $mname = $_POST["mname"];
+  $lname = $_POST["lname"];
+  $email = $_POST["email"];
+  $contactNumber = $_POST["contactNumber"];
+  $address = $_POST["address"];
+  $bday = $_POST["bday"];
+  $uname = $_POST["uname"];
+  $schedule = $_POST["schedule"];
+  $year_exp = $_POST["year_exp"];
+  $specs = $_POST["specs"];
+
+  $query = "";
+
+  if (intval($_FILES["profile"]["error"]) == 0) {
+    $uploadFile = date("mdY-his") . "_" . basename($_FILES['profile']['name']);
+    $dir = "../profile-photo";
+
+    if (!is_dir($dir)) {
+      mkdir($dir, 0777, true);
+    }
+    if (move_uploaded_file($_FILES['profile']['tmp_name'], "$dir/$uploadFile")) {
+      $query = "UPDATE users SET `profile`='$uploadFile', fname='$fname', mname='$mname', lname='$lname', email='$email', contact='$contactNumber', `address`='$address', birthday='$bday', schedule='$schedule', year_exp='$year_exp', specialization_id='$specs', uname='$uname' WHERE id='$id'";
+    } else {
+      $resp["message"] = "Error Uploading file.";
+    }
+  } else {
+    $query = "UPDATE users SET fname='$fname', mname='$mname', lname='$lname', email='$email', contact='$contactNumber', `address`='$address', birthday='$bday', schedule='$schedule', year_exp='$year_exp', specialization_id='$specs', uname='$uname' WHERE id='$id'";
+  }
+
+  if ($resp["message"] == "") {
+    $comm = mysqli_query(
+      $con,
+      $query
+    );
+
+    if ($comm) {
+      $resp["success"] = true;
+    } else {
+      $resp["message"] = mysqli_error($con);
+    }
+  }
+  return json_encode($resp);
+}
 function updateUserProfile()
 {
   global $con;
@@ -313,7 +588,7 @@ function updateUserProfile()
     "message" => "",
   );
 
-  date_default_timezone_set("Asia/Manila");
+
 
   $id = $_POST["id"];
   $fname = $_POST["fname"];

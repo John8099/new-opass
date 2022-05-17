@@ -7,7 +7,7 @@ if (!isset($_SESSION["id"])) {
 $user = mysqli_fetch_object(
   mysqli_query(
     $con,
-    "SELECT * FROM users WHERE id = $_SESSION[id]"
+    "SELECT * FROM users u INNER JOIN specialization s ON u.specialization_id = s.specialization_id WHERE id = $_SESSION[id]"
   )
 );
 if ($user->role != "atty") {

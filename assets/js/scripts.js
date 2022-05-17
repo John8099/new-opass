@@ -62,3 +62,54 @@
   });
 
 })(jQuery);
+
+// Notification
+
+const duration = 3000; // every 3 seconds
+$("#notificationBadge").hide();
+
+let timeout = setInterval(function () {
+  $.get("../../backend/nodes.php?action=getNotificationCount", function (data) {
+    if (data > 0) {
+      $("#notificationBadge").html(data);
+      $("#notificationBadge").show();
+    }
+    else {
+      $("#notificationBadge").html(data);
+      $("#notificationBadge").hide();
+    }
+  }).fail(function () {
+    clearTimeout(timeout);
+  });
+}, duration);
+
+
+$("#notification").on("show.bs.dropdown", function (event) {
+  clearTimeout(timeout);
+
+  $.get("../../backend/nodes.php?action=getNotificationData", function (data) {
+    $("#notificationData").html(data)
+  });
+});
+
+$("#notification").on("hide.bs.dropdown", function (event) {
+
+  $.get("../../backend/nodes.php?action=markAsSeen", function (data) {
+    $("#notificationData").html(data)
+  });
+
+  timeout = setInterval(function () {
+    $.get("../../backend/nodes.php?action=getNotificationCount", function (data) {
+      if (data > 0) {
+        $("#notificationBadge").html(data);
+        $("#notificationBadge").show();
+      }
+      else {
+        $("#notificationBadge").html(data);
+        $("#notificationBadge").hide();
+      }
+    }).fail(function () {
+      clearTimeout(timeout);
+    });
+  }, duration);
+});

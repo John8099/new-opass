@@ -7,12 +7,10 @@ if (!isset($_SESSION["id"])) {
 $user = mysqli_fetch_object(
   mysqli_query(
     $con,
-    "SELECT * FROM users u INNER JOIN specialization s ON u.specialization_id = s.specialization_id WHERE id = $_SESSION[id]"
+    "SELECT * FROM users WHERE id = $_SESSION[id]"
   )
 );
-if ($user->role != "atty") {
-  header("location: ../404.php");
-}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,16 +19,13 @@ if ($user->role != "atty") {
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dashboard</title>
+  <title>Notifications</title>
 
   <!-- Styles -->
-  <link href="../../assets/css/lib/calendar2/pignose.calendar.min.css" rel="stylesheet">
-  <link href="../../assets/css/lib/chartist/chartist.min.css" rel="stylesheet">
   <link href="../../assets/css/lib/font-awesome.min.css" rel="stylesheet">
   <link href="../../assets/css/lib/themify-icons.css" rel="stylesheet">
   <link href="../../assets/css/lib/owl.carousel.min.css" rel="stylesheet" />
   <link href="../../assets/css/lib/owl.theme.default.min.css" rel="stylesheet" />
-  <link href="../../assets/css/lib/weather-icons.css" rel="stylesheet" />
   <link href="../../assets/css/lib/menubar/sidebar.css" rel="stylesheet">
   <link href="../../assets/css/lib/bootstrap.min.css" rel="stylesheet">
   <link href="../../assets/css/lib/helper.css" rel="stylesheet">
@@ -51,14 +46,25 @@ if ($user->role != "atty") {
         <div class="page-header">
           <div class="page-title">
             <ol class="breadcrumb">
-              <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
-              <li class="breadcrumb-item active">Home</li>
+              <li class="breadcrumb-item"><i class="ti-bell"></i></li>
+              <li class="breadcrumb-item active">Notifications</li>
             </ol>
           </div>
         </div>
         <!-- /# row -->
         <section id="main-content">
-          <!-- Content here -->
+          <div class="card">
+            <div class="card-title">
+              Notifications
+            </div>
+            <div class="card-body">
+              <div class="row mt-4">
+                <div class="col">
+                  <ul id="divNotificationData"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
       </div>
     </div>
@@ -76,21 +82,17 @@ if ($user->role != "atty") {
   <script src="../../assets/js/scripts.js"></script>
   <!-- bootstrap -->
 
-  <script src="../../assets/js/lib/calendar-2/moment.latest.min.js"></script>
-  <script src="../../assets/js/lib/calendar-2/pignose.calendar.min.js"></script>
-  <script src="../../assets/js/lib/calendar-2/pignose.init.js"></script>
 
-
-  <script src="../../assets/js/lib/weather/jquery.simpleWeather.min.js"></script>
-  <script src="../../assets/js/lib/weather/weather-init.js"></script>
   <script src="../../assets/js/lib/circle-progress/circle-progress.min.js"></script>
   <script src="../../assets/js/lib/circle-progress/circle-progress-init.js"></script>
-  <script src="../../assets/js/lib/chartist/chartist.min.js"></script>
-  <script src="../../assets/js/lib/sparklinechart/jquery.sparkline.min.js"></script>
-  <script src="../../assets/js/lib/sparklinechart/sparkline.init.js"></script>
   <script src="../../assets/js/lib/owl-carousel/owl.carousel.min.js"></script>
   <script src="../../assets/js/lib/owl-carousel/owl.carousel-init.js"></script>
   <!-- scripit init-->
 </body>
+<script>
+  $.get("../../backend/nodes.php?action=getAllNotificationData", function(data) {
+    $("#divNotificationData").html(data)
+  });
+</script>
 
 </html>

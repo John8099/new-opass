@@ -12,62 +12,20 @@
         </div>
         <div class="float-right">
 
-          <div class="dropdown dib">
+          <div class="dropdown dib" id="notification">
             <div class="header-icon" data-toggle="dropdown">
-              <i class="ti-bell" style="font-size: 30px;"></i>
+              <i class="ti-bell mr-2" style="font-size: 30px;" id="notificationIcon">
+                <span class="position-absolute top-0 badge bg-danger" id="notificationBadge"></span>
+              </i>
+
               <div class="drop-down dropdown-menu dropdown-menu-right">
                 <div class="dropdown-content-heading">
                   <span class="text-left">Recent Notifications</span>
                 </div>
                 <div class="dropdown-content-body">
+                  <ul id="notificationData"></ul>
                   <ul>
-                    <li>
-                      <a href="#">
-                        <img class="pull-left m-r-10 avatar-img" src="../../assets/images/avatar/3.jpg" alt="" />
-                        <div class="notification-content">
-                          <small class="notification-timestamp pull-right">02:34
-                            PM</small>
-                          <div class="notification-heading">Mr. John</div>
-                          <div class="notification-text">5 members joined today </div>
-                        </div>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#">
-                        <img class="pull-left m-r-10 avatar-img" src="../../assets/images/avatar/3.jpg" alt="" />
-                        <div class="notification-content">
-                          <small class="notification-timestamp pull-right">02:34
-                            PM</small>
-                          <div class="notification-heading">Mariam</div>
-                          <div class="notification-text">likes a photo of you</div>
-                        </div>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#">
-                        <img class="pull-left m-r-10 avatar-img" src="../../assets/images/avatar/3.jpg" alt="" />
-                        <div class="notification-content">
-                          <small class="notification-timestamp pull-right">02:34
-                            PM</small>
-                          <div class="notification-heading">Tasnim</div>
-                          <div class="notification-text">Hi Teddy, Just wanted to let you
-                            ...</div>
-                        </div>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#">
-                        <img class="pull-left m-r-10 avatar-img" src="../../assets/images/avatar/3.jpg" alt="" />
-                        <div class="notification-content">
-                          <small class="notification-timestamp pull-right">02:34
-                            PM</small>
-                          <div class="notification-heading">Mr. John</div>
-                          <div class="notification-text">Hi Teddy, Just wanted to let you
-                            ...</div>
-                        </div>
-                      </a>
-                    </li>
-                    <li class="text-center">
+                    <li class="text-center" onclick="return window.location.href='../notifications/notifications.php'">
                       <a href="#" class="more-link">See All</a>
                     </li>
                   </ul>
@@ -94,14 +52,18 @@
                 </div>
                 <div class="dropdown-content-body">
                   <ul>
-                    <li onclick="return window.location.href = 'profile.php?id=<?= $user->id ?>'">
+                    <?php
+                    $userFolder = $role == "user" ? "../Users/" : "../Attorney/";
+                    $dir = $self == "notifications.php" ? $userFolder : "";
+                    ?>
+                    <li onclick="return window.location.href = '<?= $dir ?>profile.php?id=<?= $user->id ?>'">
                       <a>
                         <i class="ti-user"></i>
                         <span>Profile</span>
                       </a>
                     </li>
 
-                    <li onclick="return window.location.href = '<?= $user->role == 'user' ? 'inbox.php' : 'messages.php' ?>'">
+                    <li onclick="return window.location.href = '<?= $dir ?><?= $user->role == 'user' ? 'inbox.php' : 'messages.php' ?>'">
                       <a>
                         <i class="ti-email"></i>
                         <span>Inbox</span>

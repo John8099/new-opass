@@ -16,6 +16,9 @@ $role = $user->role;
         $exploded = explode("/", $_SERVER["PHP_SELF"]);
         $self = $exploded[count($exploded) - 1];
         $links = $role == "user" ? $userLinks : $attyLinks;
+
+        $userFolder = $role == "user" ? "../Users/" : "../Attorney/";
+        $dir = $self == "notifications.php" ? $userFolder : "";
         foreach ($links as $index => $data) {
           if ($data["link"] == $self) :
         ?>
@@ -29,7 +32,7 @@ $role = $user->role;
           else :
           ?>
             <li>
-              <a href="<?= $data['link'] ?>">
+              <a href="<?= $dir . $data['link'] ?>">
                 <i class="<?= $data['icon'] ?>"></i>
                 <?= $data['title'] ?>
               </a>

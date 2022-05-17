@@ -7,7 +7,7 @@ if (!isset($_SESSION["id"])) {
 $user = mysqli_fetch_object(
   mysqli_query(
     $con,
-    "SELECT * FROM users WHERE id = $_SESSION[id]"
+    "SELECT * FROM users u INNER JOIN specialization s ON u.specialization_id = s.specialization_id WHERE id = $_SESSION[id]"
   )
 );
 if ($user->role != "atty") {
@@ -28,6 +28,7 @@ if ($user->role != "atty") {
   <link href="../../assets/css/lib/menubar/sidebar.css" rel="stylesheet" />
   <link href="../../assets/css/lib/bootstrap.min.css" rel="stylesheet" />
   <link href="../../assets/css/lib/toastr/toastr.min.css" rel="stylesheet" />
+  <link href="../../assets/css/lib/toggle/bootstrap4-toggle.min.css" rel="stylesheet" />
   <link href="../../assets/css/style.css" rel="stylesheet" />
 </head>
 
@@ -64,6 +65,21 @@ if ($user->role != "atty") {
                           <img class="img-fluid rounded border" src="../../<?= $user->profile
                                                                               == null ? "assets/images/user-profile.jpg" :
                                                                               "profile-photo/$user->profile" ?>" style="width:200px;height: 200px;" />
+                          <div class="user-work mt-3">
+                            <div class="work-content">
+                              <h3>Specialized in</h3>
+                              <p><?= $user->specialization_name ?></p>
+                            </div>
+
+                            <div class="work-content">
+                              <h3>Year(s) of Experience</h3>
+                              <p><?= $user->year_exp ?></p>
+                            </div>
+                            <div class="work-content">
+                              <h3>Description</h3>
+                              <p><?= $user->spec_description ?></p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                       <div class="col-lg-8">
@@ -85,6 +101,10 @@ if ($user->role != "atty") {
                               <a> About </a>
                             </li>
                           </ul>
+                          <div class="work-content mt-3">
+                            <h3>Schedule</h3>
+                            <p><?= $user->schedule ?></p>
+                          </div>
                           <div class="tab-content">
                             <div role="tabpanel" class="tab-pane active" id="1">
                               <div class="contact-information">
@@ -136,7 +156,14 @@ if ($user->role != "atty") {
                                   </span>
                                 </div>
                               </div>
+                              <div class="basic-information">
+                                <h4>Set to open appointment</h4>
+                                <div class="birthday-content" id="divSwitch">
+                                  <input type="checkbox" <?= $user->opened_appointment == 1 ? "checked" : "" ?> data-toggle="toggle" data-on="Opened" data-off="Closed" data-onstyle="success" data-offstyle="danger" id="switch">
+                                </div>
+                              </div>
                             </div>
+
                             <div class="d-flex justify-content-end">
                               <a href="#update-password" data-toggle="modal" class="btn btn-primary">Update Password</a>
                             </div>
@@ -185,7 +212,7 @@ if ($user->role != "atty") {
             </div>
 
             <div class="row">
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <div class="form-group" style="margin-bottom: 10px">
                   <label class="control-label">First name</label>
                   <input class="form-control" type="text" name="fname" value="<?= $user->fname ?>" required />
@@ -209,17 +236,42 @@ if ($user->role != "atty") {
                   <input class="form-control" type="text" name="contactNumber" value="<?= $user->contact ?>" id="contact" required />
                 </div>
               </div>
-              <div class="col-md-6">
+
+              <div class="col-md-4">
                 <div class="form-group" style="margin-bottom: 10px">
+                  <label class="control-label">Schedule</label>
+                  <input class="form-control" type="text" name="schedule" value="<?= $user->schedule ?>" required />
+                </div>
+                <div class="form-group" style="margin-bottom: 10px">
+                  <label class="control-label">Year Experience</label>
+                  <input class="form-control" type="text" name="year_exp" value="<?= $user->year_exp ?>" required />
+                </div>
+                <div class="form-group" style="margin-bottom: 10px">
+                  <label class="control-label">Specialization</label>
+                  <select name="specs" class="form-control">
+                    <option value="<?= $user->specialization_id ?>"><?= $user->specialization_name ?></option>
+                    <?php
+                    $optionQuery = mysqli_query(
+                      $con,
+                      "SELECT specialization_id, specialization_name FROM specialization WHERE specialization_id != $user->specialization_id"
+                    );
+                    while ($option = mysqli_fetch_object($optionQuery)) :
+                    ?>
+                      <option value="<?= $option->specialization_id ?>"><?= $option->specialization_name ?></option>
+                    <?php endwhile; ?>
+                  </select>
+                </div>
+                <div class="form-group">
                   <label class="control-label">Address</label>
                   <input class="form-control" type="text" name="address" value="<?= $user->address ?>" required />
                 </div>
+              </div>
 
+              <div class="col-md-4">
                 <div class="form-group" style="margin-bottom: 10px">
                   <label class="control-label">Birthday</label>
                   <input class="form-control" type="date" name="bday" value="<?= $user->birthday ?>" required />
                 </div>
-
                 <div class="form-group" style="margin-bottom: 10px" id="unameDiv">
                   <label class="control-label">Username</label>
                   <input class="form-control" type="text" name="uname" id="userName" value="<?= $user->uname ?>" required />
@@ -303,6 +355,7 @@ if ($user->role != "atty") {
   <!-- bootstrap -->
   <script src="../../assets/js/lib/sweetalert/sweetalert.min.js"></script>
   <script src="../../assets/js/lib/toastr/toastr.min.js"></script>
+  <script src="../../assets/js/lib/toggle/bootstrap4-toggle.min.js"></script>
 </body>
 
 <script>
@@ -319,6 +372,41 @@ if ($user->role != "atty") {
   const divClear = $("#divClear")
 
   divClear.hide()
+
+  $('#switch').change(function(e) {
+    $.ajax({
+      url: '../../backend/nodes.php?action=setOpenedAppointment',
+      data: {
+        isChecked: e.target.checked ? 1 : 0,
+      },
+      type: 'POST',
+      success: function(data) {
+        swal.close();
+        const resp = JSON.parse(data)
+        if (resp.success) {
+          swal.fire({
+            title: 'Success!',
+            html: resp.message,
+            icon: 'success',
+          })
+        } else {
+          swal.fire({
+            title: 'Error!',
+            html: resp.message,
+            icon: 'error',
+          }).then(() => location.reload())
+        }
+      },
+      error: function(data) {
+        swal.fire({
+          title: 'Oops...',
+          html: 'Something went wrong.',
+          icon: 'error',
+        }).then(() => location.reload())
+      }
+    });
+
+  })
 
   function clearImg() {
     $("input[type=file]").val("")
@@ -539,7 +627,7 @@ if ($user->role != "atty") {
     swal.showLoading();
 
     $.ajax({
-      url: '../../backend/nodes.php?action=updateUserProfile',
+      url: '../../backend/nodes.php?action=updateAttyProfile',
       type: "POST",
       data: new FormData(this),
       contentType: false,

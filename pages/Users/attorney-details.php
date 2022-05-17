@@ -102,6 +102,10 @@ if ($user->role != "user") {
                               <a> About </a>
                             </li>
                           </ul>
+                          <div class="work-content mt-3">
+                            <h3>Schedule</h3>
+                            <p><?= $attorney->schedule ?></p>
+                          </div>
                           <div class="tab-content">
                             <div role="tabpanel" class="tab-pane active" id="1">
                               <div class="contact-information">
