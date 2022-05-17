@@ -54,6 +54,9 @@ switch ($_GET["action"]) {
   case "getAllNotificationData":
     print_r(getAllNotificationData());
     break;
+  case "deleteNotif":
+    print_r(deleteNotif());
+    break;
   case "markAsSeen":
     print_r(markAsSeen());
     break;
@@ -114,10 +117,43 @@ function setOpenedAppointment()
   return json_encode($resp);
 }
 
+function deleteNotif()
+{
+  global $con, $_POST, $_SESSION;
+
+  $resp = array(
+    "success" => false,
+    "message" => ""
+  );
+
+  $query = "";
+  if ($_POST["notification_id"] == "all") {
+    $query = "DELETE FROM notifications WHERE notify_to=$_SESSION[id]";
+  } else {
+    $query = "DELETE FROM notifications WHERE notification_id=$_POST[notification_id]";
+  }
+
+  $comm = mysqli_query($con, $query);
+
+  if ($comm) {
+    $resp["success"] = true;
+    $resp["message"] = "Notification(s) successfully remove";
+  } else {
+    $resp["success"] = false;
+    $resp["message"] = mysqli_error($con);
+  }
+
+  return json_encode($resp);
+}
+
 function getAllNotificationData()
 {
   global $con, $_SESSION;
   $html = "";
+
+  $empty = "
+  <h4 style='text-align:center'>No notifications to show.</h4>
+  ";
 
   $query = mysqli_query(
     $con,
@@ -141,8 +177,25 @@ function getAllNotificationData()
     <li class='$isActive m-4'>
       <img class='pull-left mr-4 avatar-img' style='width: 40px; height: 40px;' src='$profileDir' />
       <div class='notification-content'>
+        
+        <div class='dropdown pull-right ml-3'>
+            <button
+            class='btn'
+            id='dropdownMenuButton'
+            data-toggle='dropdown'
+            aria-haspopup='true'
+            aria-expanded='false'
+            style='background-color: transparent; border-radius: 50px;'
+          >
+            <i class='fa fa-ellipsis-v' aria-hidden='true'></i>
+          </button>
+          <div class='dropdown-menu' aria-labelledby='dropdownMenuButton'>
+            <a class='dropdown-item' href='#' onclick='deleteNotif($data->notification_id)'>Delete</a>
+          </div>
+        </div>
+    
         <small class='notification-timestamp pull-right text-primary'>
-            $time
+          $time
         </small>
         <div class='notification-heading'>
           $name
@@ -152,10 +205,11 @@ function getAllNotificationData()
         </div>
       </div>
     </li>
+    <hr>
   ";
   }
 
-  return $html;
+  return $html == "" ? $empty : $html;
 }
 
 function getSession()
@@ -180,6 +234,9 @@ function getNotificationData()
 {
   global $con, $_SESSION;
   $html = "";
+  $empty = "
+  <h6 style='text-align:center'>No notifications to show.</h6>
+  ";
 
   $query = mysqli_query(
     $con,
@@ -217,7 +274,7 @@ function getNotificationData()
   ";
   }
 
-  return $html;
+  return  $html == "" ? $empty : $html;
 }
 
 function time_elapsed_string($datetime, $full = false)

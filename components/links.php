@@ -49,4 +49,9 @@ $userLinks = array(
     "icon" => "ti-calendar",
     "link" => "book-appointment.php"
   ),
+  "openedAppointment" => array(
+    "title" => "Opened Appointment",
+    "icon" => "fa fa-envelope-open",
+    "link" => "opened-appointment.php"
+  ),
 );

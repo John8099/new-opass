@@ -55,8 +55,20 @@ $user = mysqli_fetch_object(
         <section id="main-content">
           <div class="card">
             <div class="card-title">
-              Notifications
+              <div class="row">
+                <div class="col-sm-6">
+                  Notifications
+                </div>
+                <div class="col-sm-6">
+                  <div class="d-flex justify-content-end">
+                    <button class="btn btn-danger" type="button" onclick="deleteNotif()">
+                      Delete All
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
+
             <div class="card-body">
               <div class="row mt-4">
                 <div class="col">
@@ -82,17 +94,53 @@ $user = mysqli_fetch_object(
   <script src="../../assets/js/scripts.js"></script>
   <!-- bootstrap -->
 
-
   <script src="../../assets/js/lib/circle-progress/circle-progress.min.js"></script>
   <script src="../../assets/js/lib/circle-progress/circle-progress-init.js"></script>
   <script src="../../assets/js/lib/owl-carousel/owl.carousel.min.js"></script>
   <script src="../../assets/js/lib/owl-carousel/owl.carousel-init.js"></script>
   <!-- scripit init-->
+
+  <script src="../../assets/js/lib/sweetalert/sweetalert.min.js"></script>
 </body>
 <script>
   $.get("../../backend/nodes.php?action=getAllNotificationData", function(data) {
     $("#divNotificationData").html(data)
   });
+
+  function deleteNotif(notifId = "all") {
+    swal.showLoading();
+    $.ajax({
+      url: '../../backend/nodes.php?action=deleteNotif',
+      data: {
+        notification_id: notifId
+      },
+      type: 'POST',
+      success: function(data) {
+        swal.close();
+        const resp = JSON.parse(data)
+        if (resp.success) {
+          swal.fire({
+            title: 'Success!',
+            text: resp.message,
+            icon: 'success',
+          }).then(() => location.reload())
+        } else {
+          swal.fire({
+            title: 'Error!',
+            text: resp.message,
+            icon: 'error',
+          }).then(() => location.reload())
+        }
+      },
+      error: function(data) {
+        swal.fire({
+          title: 'Oops...',
+          text: 'Something went wrong.',
+          icon: 'error',
+        }).then(() => location.reload())
+      }
+    });
+  }
 </script>
 
 </html>
