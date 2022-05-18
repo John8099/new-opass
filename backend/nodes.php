@@ -66,9 +66,119 @@ switch ($_GET["action"]) {
   case "setOpenedAppointment":
     print_r(setOpenedAppointment());
     break;
+  case "getAppointmentList":
+    print_r(getAppointmentList());
+    break;
+  case "getTodoList":
+    print_r(getTodoList());
+    break;
+  case "handleCheckUncheckTodo":
+    print_r(handleCheckUncheckTodo());
+    break;
+  case "deleteTodo":
+    print_r(deleteTodo());
+    break;
+  case "createTodo":
+    print_r(createTodo());
+    break;
   default:
     null;
     break;
+}
+
+function createTodo()
+{
+  global $con, $_POST, $_SESSION;
+
+  $query = mysqli_query(
+    $con,
+    "INSERT INTO todo(attorney_id, todo_text, is_checked) VALUES('$_SESSION[id]', '$_POST[text]', 0)"
+  );
+
+  return $query;
+}
+
+function deleteTodo()
+{
+  global $con, $_POST;
+
+  $query = mysqli_query(
+    $con,
+    "DELETE FROM todo WHERE todo_id=$_POST[todo_id]"
+  );
+
+  return $query;
+}
+
+function handleCheckUncheckTodo()
+{
+  global $con, $_POST;
+
+  $isChecked = $_POST["status"] == "checked" ? 0 : 1;
+
+  $query = mysqli_query(
+    $con,
+    "UPDATE todo SET is_checked=$isChecked WHERE todo_id=$_POST[todo_id]"
+  );
+
+  return $query;
+}
+
+function getTodoList()
+{
+  global $con, $_SESSION;
+  $html = "";
+  $empty = "<h4 style='text-align:center'>No Todo to show.</h4>";
+
+  $query = mysqli_query(
+    $con,
+    "SELECT * FROM todo WHERE attorney_id=$_SESSION[id]"
+  );
+
+  while ($todo = mysqli_fetch_object($query)) {
+    $isChecked = $todo->is_checked == 0 ? "" : "checked";
+    $paramIsChecked = $todo->is_checked == 0 ? "not checked" : "checked";
+    $html .= "
+          <li>
+            <label>
+              <input type='checkbox' $isChecked onchange='checkItem($todo->todo_id, \"$paramIsChecked\")'/>
+              <i></i>
+              <span>
+                $todo->todo_text
+              </span>
+              <a href='#' class='ti-close' onclick='deleteTodo($todo->todo_id)'></a>
+            </label>
+          </li>
+    ";
+  }
+  return $html == "" ? $empty : $html;
+}
+
+function getAppointmentList()
+{
+  global $con;
+  $query = mysqli_query(
+    $con,
+    "SELECT * FROM 
+    appointments s 
+    INNER JOIN 
+    users u 
+    ON 
+    s.user_id = u.id 
+    WHERE s.attorney_id = $_SESSION[id] and `status` = 'accepted'"
+  );
+
+  $arr = array();
+
+  while ($data = mysqli_fetch_object($query)) {
+    $title = ucwords("$data->request ($data->fname $data->lname)");
+    $startTime = "$data->appointment_date $data->appointment_time";
+    array_push($arr, [
+      "title" => $title,
+      "start" => $startTime
+    ]);
+  }
+  return json_encode($arr);
 }
 
 function setOpenedAppointment()

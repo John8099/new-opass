@@ -38,11 +38,17 @@
         return false;
       } else {
         $(".tdl-content ul").append("<li><label><input type='checkbox'><i></i><span>" + v + "</span><a href='#' class='ti-close'></a></label></li>");
+        $.ajax({
+          url: '../../backend/nodes.php?action=createTodo',
+          data: {
+            text: $(this).val(),
+          },
+          type: 'POST',
+        });
         $(this).val("");
       }
     }
   });
-
 
   $(".tdl-content a").on("click", function () {
     var _li = $(this).parent().parent("li");

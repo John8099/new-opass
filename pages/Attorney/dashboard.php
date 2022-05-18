@@ -24,16 +24,14 @@ if ($user->role != "atty") {
   <title>Dashboard</title>
 
   <!-- Styles -->
-  <link href="../../assets/css/lib/calendar2/pignose.calendar.min.css" rel="stylesheet">
-  <link href="../../assets/css/lib/chartist/chartist.min.css" rel="stylesheet">
   <link href="../../assets/css/lib/font-awesome.min.css" rel="stylesheet">
   <link href="../../assets/css/lib/themify-icons.css" rel="stylesheet">
   <link href="../../assets/css/lib/owl.carousel.min.css" rel="stylesheet" />
   <link href="../../assets/css/lib/owl.theme.default.min.css" rel="stylesheet" />
-  <link href="../../assets/css/lib/weather-icons.css" rel="stylesheet" />
   <link href="../../assets/css/lib/menubar/sidebar.css" rel="stylesheet">
   <link href="../../assets/css/lib/bootstrap.min.css" rel="stylesheet">
   <link href="../../assets/css/lib/helper.css" rel="stylesheet">
+  <link href="../../assets/css/lib/calendar/fullcalendar.min.css" rel="stylesheet">
   <link href="../../assets/css/style.css" rel="stylesheet">
 </head>
 
@@ -58,7 +56,97 @@ if ($user->role != "atty") {
         </div>
         <!-- /# row -->
         <section id="main-content">
-          <!-- Content here -->
+          <div class="row">
+
+            <div class="col-sm-3">
+              <div class="card p-0">
+                <div class="stat-widget-three">
+                  <div class="stat-icon bg-primary">
+                    <i class="fa fa-xl fa-check-square-o"></i>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-digit">123</div>
+                    <div class="stat-text">Done Appointments</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-3">
+              <div class="card p-0">
+                <div class="stat-widget-three">
+                  <div class="stat-icon bg-success">
+                    <i class="fa fa-xl fa-calendar-check-o"></i>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-digit">123</div>
+                    <div class="stat-text">Accepted Appointments</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-3">
+              <div class="card p-0">
+                <div class="stat-widget-three">
+                  <div class="stat-icon bg-warning">
+                    <i class="fa fa-xl fa-tasks"></i>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-digit">123</div>
+                    <div class="stat-text">Pending Appointments</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-3">
+              <div class="card p-0">
+                <div class="stat-widget-three">
+                  <div class="stat-icon bg-danger">
+                    <i class="fa fa-xl fa-calendar-times-o"></i>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-digit">123</div>
+                    <div class="stat-text">Canceled Appointments</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="row mt-2 d-flex justify-content-center">
+            <div class="col-sm-12">
+              <div class="card">
+                <div class="card-title">
+                  <h4>My Appointments</h4>
+                </div>
+                <div class="card-body">
+                  <div id='calendar'></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt-2 d-flex justify-content-center">
+            <div class="col-sm-10">
+              <div class="card">
+                <div class="card-title">
+                  <h4>To-do</h4>
+                </div>
+                <div class="card-body">
+                  <div class="todo-list">
+                    <div class="tdl-holder">
+                      <div class="tdl-content">
+                        <ul id="divTodo"></ul>
+                      </div>
+                      <input type="text" class="tdl-new form-control" placeholder="Write new item and hit 'Enter'..." />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
       </div>
     </div>
@@ -76,21 +164,54 @@ if ($user->role != "atty") {
   <script src="../../assets/js/scripts.js"></script>
   <!-- bootstrap -->
 
-  <script src="../../assets/js/lib/calendar-2/moment.latest.min.js"></script>
-  <script src="../../assets/js/lib/calendar-2/pignose.calendar.min.js"></script>
-  <script src="../../assets/js/lib/calendar-2/pignose.init.js"></script>
-
-
-  <script src="../../assets/js/lib/weather/jquery.simpleWeather.min.js"></script>
-  <script src="../../assets/js/lib/weather/weather-init.js"></script>
   <script src="../../assets/js/lib/circle-progress/circle-progress.min.js"></script>
   <script src="../../assets/js/lib/circle-progress/circle-progress-init.js"></script>
-  <script src="../../assets/js/lib/chartist/chartist.min.js"></script>
-  <script src="../../assets/js/lib/sparklinechart/jquery.sparkline.min.js"></script>
-  <script src="../../assets/js/lib/sparklinechart/sparkline.init.js"></script>
   <script src="../../assets/js/lib/owl-carousel/owl.carousel.min.js"></script>
   <script src="../../assets/js/lib/owl-carousel/owl.carousel-init.js"></script>
   <!-- scripit init-->
+  <script src="../../assets/js/lib/moment/moment.min.js"></script>
+  <script src="../../assets/js/lib/calendar/fullcalendar.min.js"></script>
 </body>
+
+<script>
+  $.get("../../backend/nodes.php?action=getTodoList", function(data) {
+    $("#divTodo").html(data)
+  });
+
+  function checkItem(todoId, checkedStatus) {
+    $.ajax({
+      url: '../../backend/nodes.php?action=handleCheckUncheckTodo',
+      data: {
+        status: checkedStatus,
+        todo_id: todoId
+      },
+      type: 'POST',
+    });
+  }
+
+  function deleteTodo(todoId, checkedStatus) {
+    $.ajax({
+      url: '../../backend/nodes.php?action=deleteTodo',
+      data: {
+        todo_id: todoId
+      },
+      type: 'POST',
+    });
+  }
+
+  setInterval(function() {
+    $('#calendar').fullCalendar({
+      themeSystem: 'bootstrap4',
+      header: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'month,agendaWeek,agendaDay,listMonth'
+      },
+      weekNumbers: true,
+      eventLimit: false, // allow "more" link when too many events
+      events: '../../backend/nodes.php?action=getAppointmentList'
+    });
+  }, 1000);
+</script>
 
 </html>
