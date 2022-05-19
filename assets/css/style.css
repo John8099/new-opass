@@ -963,6 +963,9 @@ a.dt-button.active:not(.disabled) {
   overflow: hidden;
   text-overflow: ellipsis;
   padding-top: 3px;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
 }
 
 .notification-timestamp {
@@ -5427,5 +5430,3 @@ h6.h1 {
     display: inline-block !important;
   }
 }
-
-

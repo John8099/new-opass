@@ -33,7 +33,8 @@ try {
 
           $message = "Your OTP code is $otpCode";
           $emailSent = sendEmail($user->email, $message) == 1 ? true : false;
-          $smsSent = sendSms($user->contact, $message) == 0 ? true : false;
+          // $smsSent = sendSms($user->contact, $message) == 0 ? true : false;
+          $smsSent = true;
 
           $resp["isEmailSent"] = $emailSent;
           $resp["isSmsSent"] = $smsSent;

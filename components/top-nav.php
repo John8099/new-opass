@@ -54,7 +54,7 @@
                   <ul>
                     <?php
                     $userFolder = $role == "user" ? "../Users/" : "../Attorney/";
-                    $dir = $self == "notifications.php" ? $userFolder : "";
+                    $dir = $self == "notifications.php" || $folder == "Conversation" ? $userFolder : "";
                     ?>
                     <li onclick="return window.location.href = '<?= $dir ?>profile.php?id=<?= $user->id ?>'">
                       <a>
@@ -63,7 +63,7 @@
                       </a>
                     </li>
 
-                    <li onclick="return window.location.href = '<?= $dir ?><?= $user->role == 'user' ? 'inbox.php' : 'messages.php' ?>'">
+                    <li onclick="return window.location.href = '../Conversation'">
                       <a>
                         <i class="ti-email"></i>
                         <span>Inbox</span>

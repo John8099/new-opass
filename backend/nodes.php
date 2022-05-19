@@ -4,6 +4,7 @@ date_default_timezone_set("Asia/Manila");
 
 include_once("conn.php");
 include_once("functionSmsEmail.php");
+$separator = "!I_I!";
 
 switch ($_GET["action"]) {
   case "emailExist":
@@ -81,9 +82,262 @@ switch ($_GET["action"]) {
   case "createTodo":
     print_r(createTodo());
     break;
+  case "getConvo":
+    print_r(getConvo());
+    break;
+  case "getChat":
+    print_r(getChat());
+    break;
+  case "insertMessage":
+    print_r(insertMessage());
+    break;
   default:
     null;
     break;
+}
+
+function insertMessage()
+{
+  global $con, $_POST, $_FILES, $_SESSION, $separator;
+  error_reporting(0);
+  $resp = array("success" => false, "message" => "");
+
+  $sender = getUserData($_SESSION['id']);
+  $senderType = $sender->role == "user" ? "user" : "attorney";
+  $message = encrypt_decrypt($_POST["message"]);
+
+  $isFileUploaded = true;
+
+  if ($_FILES["files"]["error"][0] == 0) {
+    $file_ary = reArrayFiles($_FILES['files']);
+    foreach ($file_ary as $file) {
+      $uploadFileName = date("mdY-his") . $separator . basename($file['name']);
+      $uploadFile = uploadFile($file["tmp_name"], $uploadFileName);
+      $encryptedFileName = encrypt_decrypt($uploadFileName);
+
+      if ($uploadFile) {
+        mysqli_query(
+          $con,
+          "INSERT INTO chat(incoming_id, outgoing_id, sender_type, `message`, message_type) VALUES('$_POST[incoming_id]', '$_SESSION[id]', '$senderType', '$encryptedFileName', 'file')"
+        );
+      } else {
+        $isFileUploaded = false;
+        $resp["message"] = "File could not upload.\nPlease rename file and resend it.";
+      }
+    }
+    if ($_POST["message"] != "") {
+      mysqli_query(
+        $con,
+        "INSERT INTO chat(incoming_id, outgoing_id, sender_type, `message`, message_type) VALUES('$_POST[incoming_id]', '$_SESSION[id]', '$senderType', '$message', 'text')"
+      );
+    }
+  } else {
+    mysqli_query(
+      $con,
+      "INSERT INTO chat(incoming_id, outgoing_id, sender_type, `message`, message_type) VALUES('$_POST[incoming_id]', '$_SESSION[id]', '$senderType', '$message', 'text')"
+    );
+  }
+
+  $firstMessageQuery = mysqli_num_rows(
+    mysqli_query(
+      $con,
+      "SELECT * FROM chat WHERE (incoming_id=$_SESSION[id] or outgoing_id=$_SESSION[id])"
+    )
+  );
+
+  if ($firstMessageQuery == 1) {
+    firstMessage($_POST["incoming_id"]);
+  }
+
+  if (mysqli_error($con) == "" && $isFileUploaded) {
+    $resp["success"] = true;
+  }
+
+  return json_encode($resp);
+}
+
+function firstMessage($user_id)
+{
+  global $con, $_SESSION;
+
+  $user = getUserData($_SESSION["id"]);
+
+  $name =  ucwords("$user->fname $user->lname");
+  $senderType = $user->role == "user" ? "attorney" : "user";
+
+  $toAttorney = encrypt_decrypt("Hello <strong>Atty. $name</strong>,<br>This is the <strong>Client's CHAT BOT</strong>.<br>The client must be offline.<br>Don't worry your message will be replied as soon as possible.<br><br>Thank you!");
+
+  $toUser = encrypt_decrypt("Hello <strong>$name</strong>,<br>This is the <strong>Attorney's CHAT BOT</strong>.<br>The attorney must be offline.<br>Don't worry your message will be replied as soon as possible.<br><br>Thank you!");
+
+  $message = $user->role == "user" ? $toUser : $toAttorney;
+
+  $query = mysqli_query(
+    $con,
+    "INSERT INTO chat(incoming_id, outgoing_id, sender_type, `message`, message_type) VALUES('$_SESSION[id]', '$user_id', '$senderType', '$message', 'text')"
+  );
+
+  return $query;
+}
+
+function uploadFile($tmp_file, $file_name)
+{
+  if (!is_dir("media")) {
+    mkdir("media", 0777, true);
+  }
+
+  return move_uploaded_file($tmp_file, "media/$file_name");
+}
+
+function reArrayFiles($file_post)
+{
+
+  $file_ary = array();
+  $file_count = count($file_post['name']);
+  $file_keys = array_keys($file_post);
+
+  for ($i = 0; $i < $file_count; $i++) {
+    foreach ($file_keys as $key) {
+      $file_ary[$i][$key] = $file_post[$key][$i];
+    }
+  }
+
+  return $file_ary;
+}
+
+function getChat()
+{
+  global $con, $_GET, $_SESSION;
+
+  $html = "";
+  $empty = "
+  <h5 style='text-align:center'>No message to show.<br> <small>Start chatting now.</small></h5>
+  ";
+
+  $query = mysqli_query(
+    $con,
+    "SELECT * FROM chat c LEFT JOIN users u ON u.id = c.outgoing_id
+  WHERE (c.outgoing_id = {$_SESSION['id']} AND c.incoming_id = {$_GET['incoming']})
+  OR (c.outgoing_id = {$_GET['incoming']} AND c.incoming_id = {$_SESSION['id']}) ORDER BY chat_id"
+  );
+
+  while ($chat = mysqli_fetch_object($query)) {
+    $profile = $chat->profile == null ? 'default.png' : $chat->profile;
+    $profileDir = "../../profile-photo/$profile";
+
+    $time = date_format(
+      date_create($chat->date_created),
+      "M d, Y h:i A"
+    );
+    if ($chat->outgoing_id === $_SESSION['id']) {
+      $html .= '<div class="chat outgoing chatItem ">
+                  <div class="details">
+                      <p>
+                        ' . formatChatMessage($chat->message, $chat->message_type) . '
+                        <span class="time">
+                          <br>
+                          <small>' . $time . '</small>
+                        </span>
+                      </p>
+                      
+                  </div>
+                  </div>';
+    } else {
+      $html .= '<div class="chat incoming chatItem">
+                  <img src="' . $profileDir . '" alt="">
+                  <div class="details">
+                      <p>
+                        ' . formatChatMessage($chat->message, $chat->message_type) . '
+                      <span class="time">
+                        <br>
+                        <small>' . $time . '</small>
+                      </span>
+                      </p>
+                  </div>
+                  </div>';
+    }
+  }
+
+  return $html == "" ? $empty : $html;
+}
+
+function formatChatMessage($message, $messageType)
+{
+  global $separator;
+  $messageText = encrypt_decrypt($message, 'decrypt');
+
+  $respMessage = "";
+
+  if ($messageType == "file") {
+    $fileName = explode($separator, $messageText)[1];
+    $respMessage = "<a class='text-primary text-underline' href='../../backend/media/" . $messageText . "' download='" . $fileName . "'>" . $fileName . "</a>";
+  } else {
+    $respMessage = $messageText;
+  }
+
+  return $respMessage;
+}
+
+function getConvo()
+{
+  global $con, $_SESSION, $_GET;
+  $html = "";
+
+  $empty = "
+  <h4 style='text-align:center'>No Conversation to show.</h4>
+  ";
+
+  $query = mysqli_query(
+    $con,
+    "SELECT * FROM chat WHERE (incoming_id=$_SESSION[id] or outgoing_id=$_SESSION[id]) and sender_type='$_GET[senderType]' GROUP BY incoming_id, outgoing_id"
+  );
+
+  $getLatestMessage = mysqli_fetch_object(
+    mysqli_query(
+      $con,
+      "SELECT * FROM chat WHERE (incoming_id=$_SESSION[id] or outgoing_id=$_SESSION[id]) ORDER BY chat_id DESC LIMIT 1"
+    )
+  );
+
+  while ($data = mysqli_fetch_object($query)) {
+    $user = null;
+
+    if ($data->incoming_id != $_SESSION['id']) {
+      $user = getUserData($data->incoming_id);
+    } else {
+      $user = getUserData($data->outgoing_id);
+    }
+
+    $profile = $user->profile == null ? 'default.png' : $user->profile;
+    $profileDir = "../../profile-photo/$profile";
+    $time = time_elapsed_string($data->date_created);
+    $name = $user->role == "atty" ? "Atty. " . ucwords("$user->fname " . $user->mname[0] . ". $user->lname") : ucwords("$user->fname " . $user->mname[0] . ". $user->lname");
+
+    $decryptedText = encrypt_decrypt($getLatestMessage->message, 'decrypt');
+
+    $text = $getLatestMessage->sender_type == $_GET["senderType"] ? "You: $decryptedText" : $decryptedText;
+
+    $html .= "
+      <li class='p-2 m-2' >
+        <img class='pull-left mr-4 avatar-img' style='width: 40px; height: 40px;' src='$profileDir' />
+        <div class='notification-content'>
+          <div class='messageItem' onclick='handleMessageItemClick($user->id, \"$data->sender_type\")'>
+            <small class='notification-timestamp pull-right text-primary'>
+              $time
+            </small>
+            <div class='notification-heading'>
+              $name
+            </div>
+            <div class='notification-text'>
+              $text
+            </div>
+          </div>
+        </div>
+      </li>
+    <hr>
+  ";
+  }
+
+  return $html == "" ? $empty : $html;
 }
 
 function createTodo()
@@ -909,3 +1163,21 @@ function userNameExist($userName)
     return mysqli_num_rows(mysqli_query($con, "SELECT uname FROM users WHERE uname='$userName'")) > 0 ? "true" : "false";
   }
 }
+
+function encrypt_decrypt($string, $action = 'encrypt')
+{
+  $encrypt_method = "AES-256-CBC";
+  $secret_key = 'AA74CDCC2BBRT935136HH7B63C27'; // user define private key
+  $secret_iv = '5fgf5HJ5g27'; // user define secret key
+  $key = hash('sha256', $secret_key);
+  $iv = substr(hash('sha256', $secret_iv), 0, 16); // sha256 is hash_hmac_algo
+  if ($action == 'encrypt') {
+    $output = openssl_encrypt($string, $encrypt_method, $key, 0, $iv);
+    $output = base64_encode($output);
+  } else if ($action == 'decrypt') {
+    $output = openssl_decrypt(base64_decode($string), $encrypt_method, $key, 0, $iv);
+  }
+  return $output;
+}
+// echo "Your Encrypted password is = " . $pwd = encrypt_decrypt('sample', 'encrypt');
+// echo "Your Decrypted password is = " . encrypt_decrypt($pwd, 'decrypt');

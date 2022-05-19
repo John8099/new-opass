@@ -14,7 +14,7 @@ $attyLinks = array(
   "messages" => array(
     "title" => "Messages",
     "icon" => "ti-email",
-    "link" => "messages.php"
+    "link" => "../Conversation/"
   ),
   "doneAppoint" => array(
     "title" => "Done Appointments",
@@ -32,7 +32,7 @@ $userLinks = array(
   "inbox" => array(
     "title" => "Inbox",
     "icon" => "ti-email",
-    "link" => "inbox.php"
+    "link" => "../Conversation/"
   ),
   "attorney" => array(
     "title" => "Attorney",

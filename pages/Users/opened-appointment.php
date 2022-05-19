@@ -100,7 +100,7 @@ if ($user->role != "user") {
                           <?= $attorney->specialization_name ?>
                         </td>
                         <td class="d-flex justify-content-center">
-                          <a href="#" class="btn btn-warning m-1">
+                          <a href="../Conversation/messages.php?user_id=<?= $attorney->id ?>" class="btn btn-warning m-1">
                             Chat
                           </a>
                           <a href="attorney-details.php?id=<?= $attorney->id ?>" class="btn btn-primary m-1">
