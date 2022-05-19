@@ -25,7 +25,7 @@
                 <div class="dropdown-content-body">
                   <ul id="notificationData"></ul>
                   <ul>
-                    <li class="text-center" onclick="return window.location.href='../notifications/notifications.php'">
+                    <li class="text-center" onclick="return window.location.href='../Notifications/notifications.php'">
                       <a href="#" class="more-link">See All</a>
                     </li>
                   </ul>

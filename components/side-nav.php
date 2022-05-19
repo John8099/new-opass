@@ -6,10 +6,7 @@ $role = $user->role;
     <div class="nano-content">
       <ul>
         <div class="logo">
-          <a href="index.php">
             <img src="../../6.png" alt="OPASS" style="width: 180px;" />
-            <!-- <span>Focus</span> -->
-          </a>
         </div>
         <?php
         require_once('links.php');

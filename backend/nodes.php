@@ -1,6 +1,5 @@
 <?php
 session_start();
-date_default_timezone_set("Asia/Manila");
 
 include_once("conn.php");
 include_once("functionSmsEmail.php");
@@ -99,6 +98,7 @@ switch ($_GET["action"]) {
 function insertMessage()
 {
   global $con, $_POST, $_FILES, $_SESSION, $separator;
+  date_default_timezone_set("Asia/Manila");
   error_reporting(0);
   $resp = array("success" => false, "message" => "");
 
@@ -438,6 +438,7 @@ function getAppointmentList()
 function setOpenedAppointment()
 {
   global $con, $_POST, $_SESSION;
+  date_default_timezone_set("Asia/Manila");
   $resp = array(
     "success" => false,
     "message" => ""
@@ -521,7 +522,7 @@ function getAllNotificationData()
 
   $query = mysqli_query(
     $con,
-    "SELECT * FROM notifications WHERE notify_to=$_SESSION[id] ORDER BY notification_id"
+    "SELECT * FROM notifications WHERE notify_to=$_SESSION[id] ORDER BY notification_id DESC"
   );
 
   while ($data = mysqli_fetch_object($query)) {
@@ -712,9 +713,8 @@ function deleteAppointment()
 
 function acceptAppointment()
 {
-
   global $con, $_POST;
-
+  date_default_timezone_set("Asia/Manila");
   if (count($_POST) == 0) convertUrlDataToPost();
 
   $resp = array(
@@ -760,7 +760,7 @@ function cancelAppointment()
 {
 
   global $con, $_POST;
-
+  date_default_timezone_set("Asia/Manila");
   if (count($_POST) == 0) convertUrlDataToPost();
 
   $resp = array(
@@ -805,7 +805,7 @@ function cancelAppointment()
 
 function doneAppointment()
 {
-
+  date_default_timezone_set("Asia/Manila");
   global $con, $_POST;
 
   if (count($_POST) == 0) convertUrlDataToPost();
@@ -942,10 +942,8 @@ function insertNotification($notify_to, $creator_id, $text)
 
 function updateAttyProfile()
 {
-  global $con;
-  global $_POST;
-  global $_FILES;
-
+  global $con, $_POST, $_FILES;
+  date_default_timezone_set("Asia/Manila");
   $resp = array(
     "success" => false,
     "message" => "",
@@ -1000,9 +998,8 @@ function updateAttyProfile()
 }
 function updateUserProfile()
 {
-  global $con;
-  global $_POST;
-  global $_FILES;
+  global $con, $_POST, $_FILES;
+  date_default_timezone_set("Asia/Manila");
 
   $resp = array(
     "success" => false,

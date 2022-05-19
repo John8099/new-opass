@@ -5,6 +5,11 @@ $user = "root";
 $password = "";
 $db = "opass2";
 
+// $host = "sql213.epizy.com";
+// $user = "epiz_31765644";
+// $password = "lebcWoRB9ESXB";
+// $db = "epiz_31765644_opass2";
+
 try {
   $con = mysqli_connect($host, $user, $password, $db);
 } catch (Exception $e) {

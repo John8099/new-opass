@@ -21,7 +21,7 @@ try {
   $bday = $_POST["bday"];
   $uname = $_POST["uname"];
   $email = $_POST["email"];
-  $password = password_hash($_POST["password"], PASSWORD_ARGON2I);
+  $password = md5($_POST["password"]);
 
   $q = null;
 

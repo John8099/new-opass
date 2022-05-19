@@ -13,7 +13,7 @@ $resp = array(
 
 try {
   $uname = $_POST["uname"];
-  $password = $_POST["password"];
+  $password = md5($_POST["password"]);
 
   $query = mysqli_query(
     $con,
@@ -25,7 +25,7 @@ try {
       if ($user->role !== $_GET["role"]) {
         $resp["message"] = "User not found";
       } else {
-        if (password_verify($password, $user->password)) {
+        if ($password == $user->password) {
           $_SESSION['id'] = $user->id;
           $resp["success"] = true;
           $resp["role"] = $user->role;
