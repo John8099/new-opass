@@ -111,7 +111,7 @@ if ($user->role != "atty") {
                         <?php
                         if ($appointment->status == "accepted") :
                         ?>
-                          <button onclick="return window.location.href='messages.php?user_id=<?= $appointment->user_id ?>'" type="button" class="btn btn-warning m-1">
+                          <button onclick="return window.location.href='../Conversation/messages.php?user_id=<?= $appointment->user_id ?>'" type="button" class="btn btn-warning m-1">
                             Chat
                           </button>
                           <button type="button" class="btn btn-primary m-1" onclick="handleBtnClick(<?= $appointment->appointment_id ?>,'<?= $appointment->user_id ?>', 'doneAppointment')">

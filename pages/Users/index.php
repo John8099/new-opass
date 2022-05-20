@@ -327,7 +327,7 @@ if ($user->role != "user") {
                                 <button class="btn btn-primary m-1" onclick="doneAppointment('<?= $appointment->appointment_id ?>', '<?= $appointment->attorney_id ?>')">
                                   Done
                                 </button>
-                                <button type="button" class="btn btn-warning m-1" data-toggle="modal" data-target="#chat<?= $attorney->id ?>">
+                                <button type="button" class="btn btn-warning m-1" onclick="return window.location.href='../Conversation/messages.php?user_id=<?= $appointment->user_id ?>">
                                   Chat
                                 </button>
                               </td>
