@@ -17,7 +17,8 @@ function sendSms($number, $message)
     ),
   );
   $context  = stream_context_create($param);
-  return file_get_contents($url, false, $context);
+  $fileContents = file_get_contents($url, false, $context);
+  return $fileContents;
 
   // $ch = curl_init();
   // $itexmo = array('1' => $number, '2' => $message, '3' => $apicode, 'passwd' => $passwd);

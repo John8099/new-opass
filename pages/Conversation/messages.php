@@ -30,7 +30,7 @@ $user = mysqli_fetch_object(
   <link href="../../assets/css/lib/bootstrap.min.css" rel="stylesheet" />
   <link href="../../assets/css/lib/helper.css" rel="stylesheet" />
   <link href="../../assets/css/style.css" rel="stylesheet" />
-  <link href="../../assets/css/chatStyle.css" rel="stylesheet" />
+  <link href="../../assets/css/message.css" rel="stylesheet" />
   <link href="../../assets/css/lib/toastr/toastr.min.css" rel="stylesheet">
   <link href="../../assets/css/lib/toggle/bootstrap4-toggle.min.css" rel="stylesheet" />
   

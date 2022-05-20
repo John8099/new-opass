@@ -13,7 +13,7 @@ $resp = array(
 
 try {
   $uname = $_POST["uname"];
-  $password = md5($_POST["password"]);
+  $password = $_POST["password"];
 
   $query = mysqli_query(
     $con,
@@ -25,16 +25,16 @@ try {
       if ($user->role !== $_GET["role"]) {
         $resp["message"] = "User not found";
       } else {
-        if ($password == $user->password) {
+        if (password_verify($password, $user->password)) {
           $_SESSION['id'] = $user->id;
           $resp["success"] = true;
           $resp["role"] = $user->role;
           $otpCode = generateOTP();
 
-          $message = "Your OTP code is $otpCode";
+          $message = "Your one time password is: $otpCode";
           $emailSent = sendEmail($user->email, $message) == 1 ? true : false;
-          // $smsSent = sendSms($user->contact, $message) == 0 ? true : false;
-          $smsSent = true;
+          $smsSent = sendSms($user->contact, $message) == 0 ? true : false;
+          // $smsSent = true;
 
           $resp["isEmailSent"] = $emailSent;
           $resp["isSmsSent"] = $smsSent;

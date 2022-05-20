@@ -21,7 +21,7 @@ try {
   $bday = $_POST["bday"];
   $uname = $_POST["uname"];
   $email = $_POST["email"];
-  $password = md5($_POST["password"]);
+  $password = password_hash($_POST["password"], PASSWORD_ARGON2I);
 
   $q = null;
 
@@ -53,7 +53,7 @@ try {
     $_SESSION["id"] = $last_id;
     $otpCode = generateOTP();
 
-    $message = "Your OTP code is: $otpCode";
+    $message = "Your one time password is: $otpCode";
     $emailSent = sendEmail($email, $message) == 1 ? true : false;
     $smsSent = sendSms($contactNum, $message) == 0 ? true : false;
 
