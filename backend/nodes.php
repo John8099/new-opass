@@ -314,7 +314,7 @@ function getConvo()
 
     $decryptedText = encrypt_decrypt($getLatestMessage->message, 'decrypt');
 
-    $text = $getLatestMessage->sender_type == $_GET["senderType"] ? "You: $decryptedText" : $decryptedText;
+    $text = $getLatestMessage->sender_type == $_GET["senderType"] ? "You: Send a file." : "Send a file.";
 
     $html .= "
       <li class='p-2 m-2' >
