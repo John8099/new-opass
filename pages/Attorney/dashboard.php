@@ -65,7 +65,16 @@ if ($user->role != "atty") {
                     <i class="fa fa-xl fa-check-square-o"></i>
                   </div>
                   <div class="stat-content">
-                    <div class="stat-digit">123</div>
+                    <div class="stat-digit">
+                      <?=
+                      mysqli_num_rows(
+                        mysqli_query(
+                          $con,
+                          "SELECT `status` FROM appointments WHERE `status`='done'"
+                        )
+                      )
+                      ?>
+                    </div>
                     <div class="stat-text">Done Appointments</div>
                   </div>
                 </div>
@@ -79,7 +88,16 @@ if ($user->role != "atty") {
                     <i class="fa fa-xl fa-calendar-check-o"></i>
                   </div>
                   <div class="stat-content">
-                    <div class="stat-digit">123</div>
+                    <div class="stat-digit">
+                      <?=
+                      mysqli_num_rows(
+                        mysqli_query(
+                          $con,
+                          "SELECT `status` FROM appointments WHERE `status`='accepted'"
+                        )
+                      )
+                      ?>
+                    </div>
                     <div class="stat-text">Accepted Appointments</div>
                   </div>
                 </div>
@@ -93,7 +111,16 @@ if ($user->role != "atty") {
                     <i class="fa fa-xl fa-tasks"></i>
                   </div>
                   <div class="stat-content">
-                    <div class="stat-digit">123</div>
+                    <div class="stat-digit">
+                      <?=
+                      mysqli_num_rows(
+                        mysqli_query(
+                          $con,
+                          "SELECT `status` FROM appointments WHERE `status`='pending'"
+                        )
+                      )
+                      ?>
+                    </div>
                     <div class="stat-text">Pending Appointments</div>
                   </div>
                 </div>
@@ -107,7 +134,16 @@ if ($user->role != "atty") {
                     <i class="fa fa-xl fa-calendar-times-o"></i>
                   </div>
                   <div class="stat-content">
-                    <div class="stat-digit">123</div>
+                    <div class="stat-digit">
+                      <?=
+                      mysqli_num_rows(
+                        mysqli_query(
+                          $con,
+                          "SELECT `status` FROM appointments WHERE `status`='canceled'"
+                        )
+                      )
+                      ?>
+                    </div>
                     <div class="stat-text">Canceled Appointments</div>
                   </div>
                 </div>
