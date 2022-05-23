@@ -327,7 +327,7 @@ if ($user->role != "user") {
                                 <button class="btn btn-primary m-1" onclick="doneAppointment('<?= $appointment->appointment_id ?>', '<?= $appointment->attorney_id ?>')">
                                   Done
                                 </button>
-                                <button type="button" class="btn btn-warning m-1" onclick="return window.location.href='../Conversation/messages.php?user_id=<?= $appointment->user_id ?>">
+                                <button class="btn btn-warning m-1" onclick="return window.location.href='../Conversation/messages.php?user_id=<?= $appointment->user_id ?>'">
                                   Chat
                                 </button>
                               </td>
@@ -357,6 +357,7 @@ if ($user->role != "user") {
                       <tr>
                         <th>Name</th>
                         <th>Message</th>
+                        <th>Case</th>
                         <th class="text-right">Date Ended</th>
                       </tr>
                     </thead>
@@ -380,6 +381,9 @@ if ($user->role != "user") {
                           </td>
                           <td>
                             Your Appointment with the attorney Ended!
+                          </td>
+                          <td>
+                            <?= $appointment->ended_remark ?>
                           </td>
                           <td class="text-right">
                             <?= date_format(
